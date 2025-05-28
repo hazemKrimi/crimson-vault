@@ -1,16 +1,15 @@
 /*
 Copyright © 2025 Hazem Krimi me@hazemkrimi.tech
-
 */
 package cmd
 
 import (
+	"fmt"
 	"os"
 
+	"github.com/hazemKrimi/crimson-vault/internal/models"
 	"github.com/spf13/cobra"
 )
-
-
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -24,7 +23,14 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	Run: func(cmd *cobra.Command, args []string) {
+		wrapper := models.DBWrapper{}
+		wrapper.Initialize()
+		wrapper.MigrateClients()
+		wrapper.CreateClient("Hello", "World", "12345678")
+		client := wrapper.GetClient(1)
+		fmt.Println(fmt.Sprintf("Name: %s, Country: %s, Phone: %s", client.Name, client.Country, client.Phone))
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
