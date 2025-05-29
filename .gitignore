@@ -1,0 +1,4 @@
+*.db
+.air.toml
+
+/tmp

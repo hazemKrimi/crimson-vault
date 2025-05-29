@@ -5,9 +5,10 @@ package cmd
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 
-	"github.com/hazemKrimi/crimson-vault/internal/models"
+	"github.com/hazemKrimi/crimson-vault/internal/api"
 	"github.com/spf13/cobra"
 )
 
@@ -24,12 +25,13 @@ to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
-		wrapper := models.DBWrapper{}
-		wrapper.Initialize()
-		wrapper.MigrateClients()
-		wrapper.CreateClient("Hello", "World", "12345678")
-		client := wrapper.GetClient(1)
-		fmt.Println(fmt.Sprintf("Name: %s, Country: %s, Phone: %s", client.Name, client.Country, client.Phone))
+		apiWrapper := api.APIWrapper{}
+		mux := http.NewServeMux()
+
+		apiWrapper.Initialize()
+		mux.Handle("/clients/", api.ClientRoutes(&apiWrapper))
+		fmt.Println("Server listening on PORT 5000...")
+		http.ListenAndServe(":5000", mux)
 	},
 }
 
@@ -37,6 +39,7 @@ to quickly create a Cobra application.`,
 // This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	err := rootCmd.Execute()
+
 	if err != nil {
 		os.Exit(1)
 	}
