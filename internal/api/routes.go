@@ -1,12 +1,11 @@
 package api
 
-import "net/http"
-
-func ClientRoutes(api *APIWrapper) (*http.ServeMux) {
-	mux := http.NewServeMux()
-
-	mux.HandleFunc("GET /", api.GetClientsHandler)
-	mux.HandleFunc("POST /", api.CreateClientHandler)
-
-	return mux
+func (api *API) ClientRoutes() {
+	group := api.instance.Group("/clients")
+	
+	group.GET("/", api.GetAllClientsHandler)
+	group.POST("/", api.CreateClientHandler)
+	group.GET("/:id", api.GetClientHandler)
+	group.PUT("/:id", api.UpdateClientHandler)
+	group.DELETE("/:id", api.DeleteClientHandler)
 }

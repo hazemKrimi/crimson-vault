@@ -7,16 +7,16 @@ import (
 	"gorm.io/gorm"
 )
 
-type DBWrapper struct {
-	db *gorm.DB
+type DB struct {
+	instance *gorm.DB
 }
 
-func (wrapper *DBWrapper) Connect() {
+func (wrapper *DB) Connect() {
 	db, err := gorm.Open(sqlite.Open("crimson_vault.db"), &gorm.Config{})
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	wrapper.db = db
+	wrapper.instance = db
 }

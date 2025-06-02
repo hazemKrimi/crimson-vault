@@ -1,60 +1,112 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/hazemKrimi/crimson-vault/internal/models"
+	"github.com/labstack/echo/v4"
 )
 
-func (api *APIWrapper) CreateClientHandler(writer http.ResponseWriter, request *http.Request) {
+func (api *API) CreateClientHandler(context echo.Context) error {
 	var body models.CreateClientBody
 
-	if err := json.NewDecoder(request.Body).Decode(&body); err != nil {
-		http.Error(writer, "Invalid JSON", http.StatusBadRequest)
+	if err := context.Bind(&body); err != nil {
 		log.Println(fmt.Sprintf("Error creating Client: %v.", err))
-		return
+		return context.String(http.StatusBadRequest, "Invalid JSON!")
 	}
 
-	client := api.dbWrapper.CreateClient(body)
+	client := api.db.CreateClient(body)
 
 	log.Println(fmt.Sprintf("Client created with ID %d.", client.ID))
-	json.NewEncoder(writer).Encode(client)
+	return context.JSON(http.StatusOK, client)
 }
 
-func (api *APIWrapper) GetClientsHandler(writer http.ResponseWriter, request *http.Request) {
-	idString := request.URL.Query().Get("id")
-
-	if idString != "" {
-		id, err := strconv.Atoi(idString)
-
-		if err != nil {
-			http.Error(writer, "Unexpected error getting Client.", http.StatusInternalServerError)
-			return
-		}
-
-		var client models.Client
-
-		if err := api.dbWrapper.GetClient(id, &client); err != nil {
-			http.Error(writer, "Client not found.", http.StatusNotFound)
-			return
-		}
-
-		log.Println(fmt.Sprintf("Got client with ID %d.", client.ID))
-		json.NewEncoder(writer).Encode(client)
-		return
-	}
-
-	clients, err := api.dbWrapper.GetClients()
+func (api *API) GetAllClientsHandler(context echo.Context) error {
+	clients, err := api.db.GetClients()
 
 	if err != nil {
-		http.Error(writer, "Unexpected error getting Clients.", http.StatusInternalServerError)
-		return
+		return context.String(http.StatusInternalServerError, "Unexpected error getting Clients!")
 	}
 
 	log.Println("Got all Clients.")
-	json.NewEncoder(writer).Encode(clients)
+	return context.JSON(http.StatusOK, clients)
+}
+
+func (api *API) GetClientHandler(context echo.Context) error {
+	idString := context.Param("id")
+
+	if idString == "" {
+		return context.String(http.StatusBadRequest, "ID is required to get a Client!")
+	}
+
+	id, err := strconv.Atoi(idString)
+
+	if err != nil {
+		return context.String(http.StatusInternalServerError, "Unexpected error getting Client!")
+	}
+
+	var client models.Client
+
+	if err := api.db.GetClient(id, &client); err != nil {
+		return context.String(http.StatusNotFound, "Client not found!")
+	}
+
+	log.Println(fmt.Sprintf("Got client with ID %d.", client.ID))
+	return context.JSON(http.StatusOK, client)
+}
+
+func (api *API) UpdateClientHandler(context echo.Context) error {
+	idString := context.Param("id")
+
+	if idString == "" {
+		return context.String(http.StatusBadRequest, "ID is required to update a Client!")
+	}
+
+	id, err := strconv.Atoi(idString)
+
+	if err != nil {
+		return context.String(http.StatusInternalServerError, "Unexpected error updating Client!")
+	}
+
+	var body models.UpdateClientBody
+
+	if err := context.Bind(&body); err != nil {
+		log.Println(fmt.Sprintf("Error updating Client: %v.", err))
+		return context.String(http.StatusBadRequest, "Invalid JSON!")
+	}
+
+	var client models.Client
+
+	if err := api.db.UpdateClient(id, body, &client); err != nil {
+		return context.String(http.StatusNotFound, "Client not found!")
+	}
+
+	log.Println(fmt.Sprintf("Updated client with ID %d.", client.ID))
+	return context.JSON(http.StatusOK, client)
+}
+
+func (api *API) DeleteClientHandler(context echo.Context) error {
+	idString := context.Param("id")
+
+	if idString == "" {
+		return context.String(http.StatusBadRequest, "ID is required to delete a Client!")
+	}
+
+	id, err := strconv.Atoi(idString)
+
+	if err != nil {
+		return context.String(http.StatusInternalServerError, "Unexpected error deleting Client!")
+	}
+
+	var client models.Client
+
+	if err := api.db.DeleteClient(id); err != nil {
+		return context.String(http.StatusNotFound, "Client not found!")
+	}
+
+	log.Println(fmt.Sprintf("Deleted client with ID %d.", client.ID))
+	return context.String(http.StatusOK, "Client deleted successfully!")
 }

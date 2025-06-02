@@ -4,8 +4,6 @@ Copyright © 2025 Hazem Krimi me@hazemkrimi.tech
 package cmd
 
 import (
-	"fmt"
-	"net/http"
 	"os"
 
 	"github.com/hazemKrimi/crimson-vault/internal/api"
@@ -25,13 +23,9 @@ to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
-		apiWrapper := api.APIWrapper{}
-		mux := http.NewServeMux()
+		server := api.API{}
 
-		apiWrapper.Initialize()
-		mux.Handle("/clients/", api.ClientRoutes(&apiWrapper))
-		fmt.Println("Server listening on PORT 5000...")
-		http.ListenAndServe(":5000", mux)
+		server.Initialize()
 	},
 }
 

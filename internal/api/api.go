@@ -1,16 +1,29 @@
 package api
 
-import "github.com/hazemKrimi/crimson-vault/internal/models"
+import (
+	"github.com/hazemKrimi/crimson-vault/internal/models"
+	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v4"
+)
 
-type APIWrapper struct {
-	dbWrapper *models.DBWrapper
+type API struct {
+	instance *echo.Echo
+	db       *models.DB
 }
 
-func (api *APIWrapper) Initialize() {
-	wrapper := models.DBWrapper{}
+func (api *API) Initialize() {
+	db := &models.DB{}
+	ech := echo.New()
 
-	wrapper.Connect()
-	wrapper.MigrateClients()
+	db.Connect()
+	db.MigrateClients()
 
-	api.dbWrapper = &wrapper;
+	api.db = db
+	api.instance = ech
+
+	api.ClientRoutes()
+	api.instance.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+	}))
+	api.instance.Logger.Fatal(api.instance.Start(":5000"))
 }
