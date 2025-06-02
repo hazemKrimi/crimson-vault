@@ -2,8 +2,8 @@ package api
 
 import (
 	"github.com/hazemKrimi/crimson-vault/internal/models"
-	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 )
 
 type API struct {
@@ -18,8 +18,8 @@ func (api *API) Initialize() {
 	db.Connect()
 	db.MigrateClients()
 
-	api.db = db
 	api.instance = ech
+	api.db = db
 
 	api.ClientRoutes()
 	api.instance.Use(middleware.CORSWithConfig(middleware.CORSConfig{

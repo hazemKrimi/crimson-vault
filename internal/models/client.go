@@ -7,25 +7,37 @@ import (
 )
 
 type Client struct {
-	ID        uint32         `json:"id"`
-	CreatedAt time.Time      `json:"createAt"`
-	UpdatedAt time.Time      `json:"updatedAt"`
-	DeletedAt gorm.DeletedAt `json:"deletedAt" gorm:"index"`
-	Name      string         `json:"name"`
-	Country   string         `json:"country"`
-	Phone     string         `json:"phone"`
+	ID         uint32         `json:"id"`
+	CreatedAt  time.Time      `json:"createAt"`
+	UpdatedAt  time.Time      `json:"updatedAt"`
+	DeletedAt  gorm.DeletedAt `json:"deletedAt" gorm:"index"`
+	Name       string         `json:"name"`
+	FiscalCode string         `json:"fiscalCode"`
+	Address    string         `json:"address"`
+	Zip        string         `json:"zip"`
+	Country    string         `json:"country"`
+	Phone      string         `json:"phone"`
+	Email      string         `json:"email"`
 }
 
 type CreateClientBody struct {
-	Name    string `json:"name"`
-	Country string `json:"country"`
-	Phone   string `json:"phone"`
+	Name       string         `json:"name"`
+	FiscalCode string         `json:"fiscalCode"`
+	Address    string         `json:"address"`
+	Zip        string         `json:"zip"`
+	Country    string         `json:"country"`
+	Phone      string         `json:"phone"`
+	Email      string         `json:"email"`
 }
 
 type UpdateClientBody struct {
-	Name    string `json:"name"`
-	Country string `json:"country"`
-	Phone   string `json:"phone"`
+	Name       string         `json:"name"`
+	FiscalCode string         `json:"fiscalCode"`
+	Address    string         `json:"address"`
+	Zip        string         `json:"zip"`
+	Country    string         `json:"country"`
+	Phone      string         `json:"phone"`
+	Email      string         `json:"email"`
 }
 
 func (db *DB) MigrateClients() {
