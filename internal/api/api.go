@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/go-playground/validator/v10"
 	"github.com/hazemKrimi/crimson-vault/internal/models"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -14,6 +15,7 @@ type API struct {
 func (api *API) Initialize() {
 	db := &models.DB{}
 	ech := echo.New()
+	ech.Validator = &CustomValidator{validator: validator.New(validator.WithRequiredStructEnabled())}
 
 	db.Connect()
 	db.MigrateClients()

@@ -11,11 +11,15 @@ import (
 )
 
 func (api *API) CreateClientHandler(context echo.Context) error {
-	var body models.CreateClientBody
+	var body models.CreateClientRequestBody
 
 	if err := context.Bind(&body); err != nil {
 		log.Println(fmt.Sprintf("Error creating Client: %v.", err))
 		return context.String(http.StatusBadRequest, "Invalid JSON!")
+	}
+
+	if err := context.Validate(body); err != nil {
+		return err
 	}
 
 	client := api.db.CreateClient(body)
@@ -71,11 +75,15 @@ func (api *API) UpdateClientHandler(context echo.Context) error {
 		return context.String(http.StatusInternalServerError, "Unexpected error updating Client!")
 	}
 
-	var body models.UpdateClientBody
+	var body models.UpdateClientRequestBody
 
 	if err := context.Bind(&body); err != nil {
 		log.Println(fmt.Sprintf("Error updating Client: %v.", err))
 		return context.String(http.StatusBadRequest, "Invalid JSON!")
+	}
+
+	if err := context.Validate(body); err != nil {
+		return err
 	}
 
 	var client models.Client
