@@ -24,21 +24,21 @@ type User struct {
 }
 
 type CreateUserRequestBody struct {
-	Name       string `json:"name" validate:"required"`
+	Name       string `json:"name" validate:"required,alpha"`
 	FiscalCode string `json:"fiscalCode" validate:"required"`
 	Address    string `json:"address" validate:"required"`
 	Zip        string `json:"zip" validate:"required"`
-	Country    string `json:"country" validate:"required"`
+	Country    string `json:"country" validate:"required,alpha"`
 	Phone      string `json:"phone" validate:"required,e164"`
 	Email      string `json:"email" validate:"required,email"`
 }
 
 type UpdateUserRequestBody struct {
-	Name       string `json:"name"`
+	Name       string `json:"name" validate:"omitempty,alpha"`
 	FiscalCode string `json:"fiscalCode"`
 	Address    string `json:"address"`
 	Zip        string `json:"zip"`
-	Country    string `json:"country"`
+	Country    string `json:"country" validate:"omitempty,alpha"`
 	Phone      string `json:"phone" validate:"omitempty,e164"`
 	Email      string `json:"email" validate:"omitempty,email"`
 }

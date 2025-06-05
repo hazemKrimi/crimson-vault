@@ -1,6 +1,8 @@
 package models
 
 import (
+	"strings"
+
 	"github.com/hazemKrimi/crimson-vault/internal/types"
 )
 
@@ -77,7 +79,7 @@ func (db *DB) UpdateUserSecurityDetails(id int, body types.UpdateUserSecurityDet
 	}
 
 	result = db.instance.Model(user).Updates(types.User{
-		Username: body.Username,
+		Username: strings.ToLower(body.Username),
 		Password: body.Password,
 	})
 
