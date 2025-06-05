@@ -13,12 +13,16 @@ type API struct {
 }
 
 func (api *API) Initialize() {
+	validator := validator.New(validator.WithRequiredStructEnabled())
+	validator.RegisterValidation("password", PasswordValidator)
+
 	db := &models.DB{}
 	ech := echo.New()
-	ech.Validator = &CustomValidator{validator: validator.New(validator.WithRequiredStructEnabled())}
+	ech.Validator = &CustomValidator{validator: validator}
 
 	db.Connect()
 	db.MigrateClients()
+	db.MigrateUsers()
 
 	api.instance = ech
 	api.db = db
