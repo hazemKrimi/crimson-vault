@@ -1,15 +1,20 @@
 package api
 
 import (
+	"fmt"
+
 	"github.com/go-playground/validator/v10"
-	"github.com/hazemKrimi/crimson-vault/internal/models"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+
+	"github.com/hazemKrimi/crimson-vault/internal/lib"
+	"github.com/hazemKrimi/crimson-vault/internal/models"
 )
 
 type API struct {
-	instance *echo.Echo
-	db       *models.DB
+	ConfigDirectory string
+	instance  *echo.Echo
+	db        *models.DB
 }
 
 func (api *API) Initialize() {
@@ -20,7 +25,7 @@ func (api *API) Initialize() {
 	ech := echo.New()
 	ech.Validator = &CustomValidator{validator: validator}
 
-	db.Connect()
+	db.Connect(api.ConfigDirectory)
 	db.MigrateClients()
 	db.MigrateUsers()
 
@@ -28,8 +33,9 @@ func (api *API) Initialize() {
 	api.db = db
 
 	api.ClientRoutes()
+	api.UserRoutes()
 	api.instance.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 	}))
-	api.instance.Logger.Fatal(api.instance.Start(":5000"))
+	api.instance.Logger.Fatal(api.instance.Start(fmt.Sprintf(":%d", lib.DEFAULT_PORT)))
 }

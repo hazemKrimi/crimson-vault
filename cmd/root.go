@@ -4,9 +4,11 @@ Copyright © 2025 Hazem Krimi me@hazemkrimi.tech
 package cmd
 
 import (
+	"log"
 	"os"
 
 	"github.com/hazemKrimi/crimson-vault/internal/api"
+	"github.com/hazemKrimi/crimson-vault/internal/lib"
 	"github.com/spf13/cobra"
 )
 
@@ -23,8 +25,17 @@ to quickly create a Cobra application.`,
 	// Uncomment the following line if your bare application
 	// has an action associated with it:
 	Run: func(cmd *cobra.Command, args []string) {
-		server := api.API{}
+		dir, err := lib.GetConfigDirectory()
 
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if err := os.MkdirAll(dir, os.ModePerm); err != nil {
+			log.Fatal(err)
+		}
+
+		server := api.API{ConfigDirectory: dir}
 		server.Initialize()
 	},
 }
@@ -50,5 +61,3 @@ func init() {
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }
-
-

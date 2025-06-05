@@ -4,13 +4,16 @@ import "github.com/labstack/echo/v4/middleware"
 
 func (api *API) ClientRoutes() {
 	clients := api.instance.Group("/clients")
-	users := api.instance.Group("/users")
 	
 	clients.GET("/", api.GetAllClientsHandler)
 	clients.POST("/", api.CreateClientHandler)
 	clients.GET("/:id", api.GetClientHandler)
 	clients.PUT("/:id", api.UpdateClientHandler)
 	clients.DELETE("/:id", api.DeleteClientHandler)
+}
+
+func (api *API) UserRoutes() {
+	users := api.instance.Group("/users")
 
 	users.GET("/", api.GetAllUsersHandler)
 	users.POST("/", api.CreateUserHandler)

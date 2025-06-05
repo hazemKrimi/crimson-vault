@@ -199,14 +199,12 @@ func (api *API) UpdateUserLogoHandler(context echo.Context) error {
 		return context.String(http.StatusBadRequest, "Uploaded file is not a valid image!")
 	}
 
-	err = os.MkdirAll(user.Username, os.ModePerm)
-
-	if err != nil {
+	if err := os.MkdirAll(filepath.Join(api.ConfigDirectory, user.Username), os.ModePerm); err != nil {
 		log.Println(fmt.Sprintf("Error updating logo for User: %v.", err))
 		return context.String(http.StatusInternalServerError, "Unexpected error while updating logo for User!")
 	}
 
-	path, err := filepath.Abs(filepath.Join(user.Username, fmt.Sprintf("logo%s", ext)))
+	path, err := filepath.Abs(filepath.Join(api.ConfigDirectory, user.Username, fmt.Sprintf("logo%s", ext)))
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Error updating logo for User: %v.", err))
