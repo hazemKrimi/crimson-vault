@@ -10,7 +10,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/hazemKrimi/crimson-vault/internal/lib"
 	"github.com/hazemKrimi/crimson-vault/internal/types"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 )
 
@@ -27,6 +29,18 @@ func (api *API) CreateUserHandler(context echo.Context) error {
 	}
 
 	user := api.db.CreateUser(body)
+	sess, err := session.Get("session", context)
+
+	if err != nil {
+		api.db.DeleteUser(user.ID)
+		return context.String(http.StatusInternalServerError, "Unexpected error saving User session!")
+	}
+
+	lib.ConstructSession(sess, user)
+
+	if err := sess.Save(context.Request(), context.Response()); err != nil {
+		return context.String(http.StatusInternalServerError, "Unexpected error saving User session!")
+	}
 
 	log.Println(fmt.Sprintf("User created with ID %d.", user.ID))
 	return context.JSON(http.StatusOK, user)
@@ -50,7 +64,7 @@ func (api *API) GetUserHandler(context echo.Context) error {
 		return context.String(http.StatusBadRequest, "ID is required to get a User!")
 	}
 
-	id, err := strconv.Atoi(idString)
+	id, err := strconv.ParseUint(idString, 10, 32)
 
 	if err != nil {
 		return context.String(http.StatusInternalServerError, "Unexpected error getting User!")
@@ -58,7 +72,7 @@ func (api *API) GetUserHandler(context echo.Context) error {
 
 	var user types.User
 
-	if err := api.db.GetUser(id, &user); err != nil {
+	if err := api.db.GetUser(uint32(id), &user); err != nil {
 		return context.String(http.StatusNotFound, "User not found!")
 	}
 
@@ -73,7 +87,7 @@ func (api *API) UpdateUserHandler(context echo.Context) error {
 		return context.String(http.StatusBadRequest, "ID is required to update a User!")
 	}
 
-	id, err := strconv.Atoi(idString)
+	id, err := strconv.ParseUint(idString, 10, 32)
 
 	if err != nil {
 		return context.String(http.StatusInternalServerError, "Unexpected error updating User!")
@@ -92,7 +106,7 @@ func (api *API) UpdateUserHandler(context echo.Context) error {
 
 	var user types.User
 
-	if err := api.db.UpdateUser(id, body, &user); err != nil {
+	if err := api.db.UpdateUser(uint32(id), body, &user); err != nil {
 		return context.String(http.StatusNotFound, "User not found!")
 	}
 
@@ -107,7 +121,7 @@ func (api *API) UpdateUserSecurityDetailsHandler(context echo.Context) error {
 		return context.String(http.StatusBadRequest, "ID is required to create security details for a User!")
 	}
 
-	id, err := strconv.Atoi(idString)
+	id, err := strconv.ParseUint(idString, 10, 32)
 
 	if err != nil {
 		return context.String(http.StatusInternalServerError, "Unexpected error while creating security details for User!")
@@ -126,7 +140,7 @@ func (api *API) UpdateUserSecurityDetailsHandler(context echo.Context) error {
 
 	var user types.User
 
-	if err := api.db.UpdateUserSecurityDetails(id, body, &user); err != nil {
+	if err := api.db.UpdateUserSecurityDetails(uint32(id), body, &user); err != nil {
 		return context.String(http.StatusNotFound, "User not found!")
 	}
 
@@ -141,7 +155,7 @@ func (api *API) UpdateUserLogoHandler(context echo.Context) error {
 		return context.String(http.StatusBadRequest, "ID is required to update logo for User!")
 	}
 
-	id, err := strconv.Atoi(idString)
+	id, err := strconv.ParseUint(idString, 10, 32)
 
 	if err != nil {
 		return context.String(http.StatusInternalServerError, "Unexpected error updating logo for User!")
@@ -149,7 +163,7 @@ func (api *API) UpdateUserLogoHandler(context echo.Context) error {
 
 	var user types.User
 
-	if err := api.db.GetUser(id, &user); err != nil {
+	if err := api.db.GetUser(uint32(id), &user); err != nil {
 		return context.String(http.StatusNotFound, "User not found!")
 	}
 
@@ -231,13 +245,13 @@ func (api *API) DeleteUserHandler(context echo.Context) error {
 		return context.String(http.StatusBadRequest, "ID is required to delete a User!")
 	}
 
-	id, err := strconv.Atoi(idString)
+	id, err := strconv.ParseUint(idString, 10, 32)
 
 	if err != nil {
 		return context.String(http.StatusInternalServerError, "Unexpected error deleting User!")
 	}
 
-	if err := api.db.DeleteUser(id); err != nil {
+	if err := api.db.DeleteUser(uint32(id)); err != nil {
 		return context.String(http.StatusNotFound, "User not found!")
 	}
 
@@ -252,7 +266,7 @@ func (api *API) DeleteUserLogoHandler(context echo.Context) error {
 		return context.String(http.StatusBadRequest, "ID is required to delete logo of User!")
 	}
 
-	id, err := strconv.Atoi(idString)
+	id, err := strconv.ParseUint(idString, 10, 32)
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Error deleting logo of User: %v.", err))
@@ -261,7 +275,7 @@ func (api *API) DeleteUserLogoHandler(context echo.Context) error {
 
 	var user types.User
 
-	if err := api.db.GetUser(id, &user); err != nil {
+	if err := api.db.GetUser(uint32(id), &user); err != nil {
 		return context.String(http.StatusNotFound, "User not found!")
 	}
 

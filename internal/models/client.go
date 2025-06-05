@@ -35,7 +35,7 @@ func (db *DB) GetClients() ([]types.Client, error) {
 	return clients, nil
 }
 
-func (db *DB) GetClient(id int, client *types.Client) error {
+func (db *DB) GetClient(id uint32, client *types.Client) error {
 	result := db.instance.Where("id = ?", id).First(client, id)
 
 	if result.Error != nil {
@@ -45,7 +45,7 @@ func (db *DB) GetClient(id int, client *types.Client) error {
 	return nil
 }
 
-func (db *DB) UpdateClient(id int, body types.UpdateClientRequestBody, client *types.Client) error {
+func (db *DB) UpdateClient(id uint32, body types.UpdateClientRequestBody, client *types.Client) error {
 	result := db.instance.Where("id = ?", id).First(client, id)
 
 	if result.Error != nil {
@@ -69,7 +69,7 @@ func (db *DB) UpdateClient(id int, body types.UpdateClientRequestBody, client *t
 	return nil
 }
 
-func (db *DB) DeleteClient(id int) error {
+func (db *DB) DeleteClient(id uint32) error {
 	result := db.instance.Delete(&types.Client{}, id)
 
 	if result.Error != nil {

@@ -37,7 +37,7 @@ func (db *DB) GetUsers() ([]types.User, error) {
 	return users, nil
 }
 
-func (db *DB) GetUser(id int, user *types.User) error {
+func (db *DB) GetUser(id uint32, user *types.User) error {
 	result := db.instance.Where("id = ?", id).First(user, id)
 
 	if result.Error != nil {
@@ -47,7 +47,7 @@ func (db *DB) GetUser(id int, user *types.User) error {
 	return nil
 }
 
-func (db *DB) UpdateUser(id int, body types.UpdateUserRequestBody, user *types.User) error {
+func (db *DB) UpdateUser(id uint32, body types.UpdateUserRequestBody, user *types.User) error {
 	result := db.instance.Where("id = ?", id).First(user, id)
 
 	if result.Error != nil {
@@ -71,7 +71,7 @@ func (db *DB) UpdateUser(id int, body types.UpdateUserRequestBody, user *types.U
 	return nil
 }
 
-func (db *DB) UpdateUserSecurityDetails(id int, body types.UpdateUserSecurityDetailsBody, user *types.User) error {
+func (db *DB) UpdateUserSecurityDetails(id uint32, body types.UpdateUserSecurityDetailsBody, user *types.User) error {
 	result := db.instance.Where("id = ?", id).First(user, id)
 
 	if result.Error != nil {
@@ -102,7 +102,7 @@ func (db *DB) UpdateUserLogo(path string, user *types.User) error {
 	return nil
 }
 
-func (db *DB) DeleteUser(id int) error {
+func (db *DB) DeleteUser(id uint32) error {
 	result := db.instance.Delete(&types.User{}, id)
 
 	if result.Error != nil {

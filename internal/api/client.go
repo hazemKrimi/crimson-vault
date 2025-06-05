@@ -46,7 +46,7 @@ func (api *API) GetClientHandler(context echo.Context) error {
 		return context.String(http.StatusBadRequest, "ID is required to get a Client!")
 	}
 
-	id, err := strconv.Atoi(idString)
+	id, err := strconv.ParseUint(idString, 10, 32) 
 
 	if err != nil {
 		return context.String(http.StatusInternalServerError, "Unexpected error getting Client!")
@@ -54,7 +54,7 @@ func (api *API) GetClientHandler(context echo.Context) error {
 
 	var client types.Client
 
-	if err := api.db.GetClient(id, &client); err != nil {
+	if err := api.db.GetClient(uint32(id), &client); err != nil {
 		return context.String(http.StatusNotFound, "Client not found!")
 	}
 
@@ -69,7 +69,7 @@ func (api *API) UpdateClientHandler(context echo.Context) error {
 		return context.String(http.StatusBadRequest, "ID is required to update a Client!")
 	}
 
-	id, err := strconv.Atoi(idString)
+	id, err := strconv.ParseUint(idString, 10, 32) 
 
 	if err != nil {
 		return context.String(http.StatusInternalServerError, "Unexpected error updating Client!")
@@ -88,7 +88,7 @@ func (api *API) UpdateClientHandler(context echo.Context) error {
 
 	var client types.Client
 
-	if err := api.db.UpdateClient(id, body, &client); err != nil {
+	if err := api.db.UpdateClient(uint32(id), body, &client); err != nil {
 		return context.String(http.StatusNotFound, "Client not found!")
 	}
 
@@ -103,7 +103,7 @@ func (api *API) DeleteClientHandler(context echo.Context) error {
 		return context.String(http.StatusBadRequest, "ID is required to delete a Client!")
 	}
 
-	id, err := strconv.Atoi(idString)
+	id, err := strconv.ParseUint(idString, 10, 32) 
 
 	if err != nil {
 		return context.String(http.StatusInternalServerError, "Unexpected error deleting Client!")
@@ -111,7 +111,7 @@ func (api *API) DeleteClientHandler(context echo.Context) error {
 
 	var client types.Client
 
-	if err := api.db.DeleteClient(id); err != nil {
+	if err := api.db.DeleteClient(uint32(id)); err != nil {
 		return context.String(http.StatusNotFound, "Client not found!")
 	}
 

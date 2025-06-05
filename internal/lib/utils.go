@@ -3,6 +3,9 @@ package lib
 import (
 	"os"
 	"path/filepath"
+
+	"github.com/gorilla/sessions"
+	"github.com/hazemKrimi/crimson-vault/internal/types"
 )
 
 func GetConfigDirectory() (string, error) {
@@ -15,4 +18,13 @@ func GetConfigDirectory() (string, error) {
 	config, err := filepath.Abs(filepath.Join(home, DEFAULT_CONFIG_DIRECTORY))
 
 	return config, nil
+}
+
+func ConstructSession(session *sessions.Session, user types.User) {
+	session.Options = &sessions.Options{
+		Path:     "/",
+		MaxAge:   86400 * 7,
+		HttpOnly: true,
+	}
+	session.Values["id"] = user.ID
 }
