@@ -11,8 +11,18 @@ func SessionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(context echo.Context) error {
 		sess, err := session.Get("session", context)
 
-		if sess == nil || err != nil {
-			return context.String(http.StatusBadRequest, "User not authenticated!")
+		if err != nil {
+			return context.String(http.StatusUnauthorized, "User not authenticated!")
+		}
+
+		cookie, err := context.Cookie("session")
+
+		if err != nil {
+			return context.String(http.StatusUnauthorized, "User not authenticated!")
+		}
+
+		if sess.IsNew || cookie.Value == "" || sess.Values["id"] == "" {
+			return context.String(http.StatusUnauthorized, "User not authenticated!")
 		}
 
 		context.Set("id", sess.Values["id"])

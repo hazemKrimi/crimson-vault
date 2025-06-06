@@ -23,7 +23,7 @@ func GetConfigDirectory() (string, error) {
 func ConstructSession(session *sessions.Session, user types.User) {
 	session.Options = &sessions.Options{
 		Path:     "/",
-		MaxAge:   86400 * 7,
+		MaxAge:   3600,
 		HttpOnly: true,
 	}
 	session.Values["id"] = user.ID
