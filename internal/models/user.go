@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+
 	"github.com/hazemKrimi/crimson-vault/internal/lib"
 	"github.com/hazemKrimi/crimson-vault/internal/types"
 )
@@ -91,6 +92,7 @@ func (db *DB) UpdateUser(id uuid.UUID, body types.UpdateUserRequestBody, user *t
 		Country:    body.Country,
 		Phone:      body.Phone,
 		Email:      body.Email,
+		Username:   strings.ToLower(body.Username),
 	})
 
 	if result.Error != nil {
@@ -100,7 +102,7 @@ func (db *DB) UpdateUser(id uuid.UUID, body types.UpdateUserRequestBody, user *t
 	return nil
 }
 
-func (db *DB) UpdateUserSecurityDetails(id uuid.UUID, body types.UpdateUserSecurityDetailsBody, user *types.User) error {
+func (db *DB) UpdateUserSecurityCredentials(id uuid.UUID, body types.UpdateUserSecurityCredentialsBody, user *types.User) error {
 	result := db.instance.Where("id = ?", id).First(user, id)
 
 	if result.Error != nil {
@@ -114,7 +116,6 @@ func (db *DB) UpdateUserSecurityDetails(id uuid.UUID, body types.UpdateUserSecur
 	}
 
 	result = db.instance.Model(user).Updates(types.User{
-		Username: strings.ToLower(body.Username),
 		Password: hashedPassword,
 	})
 

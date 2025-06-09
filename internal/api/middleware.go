@@ -38,7 +38,7 @@ func (api *API) AuthSessionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 		context.Set("id", sess.Values["id"])
 		context.Set("sessionId", sess.Values["sessionId"])
-		context.Set("username", sess.Values["username"])
+		context.Set("name", sess.Values["name"])
 
 		return next(context)
 	}

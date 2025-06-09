@@ -4,13 +4,26 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
+
+	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 
 	"github.com/hazemKrimi/crimson-vault/internal/types"
-	"github.com/labstack/echo/v4"
 )
 
 func (api *API) CreateClientHandler(context echo.Context) error {
+	userId, ok := context.Get("id").(string)
+
+	if !ok {
+		return context.String(http.StatusInternalServerError, "Unexpected error getting User!")
+	}
+
+	id, err := uuid.Parse(userId)
+
+	if err != nil {
+		return context.String(http.StatusInternalServerError, "Unexpected error getting User!")
+	}
+
 	var body types.CreateClientRequestBody
 
 	if err := context.Bind(&body); err != nil {
@@ -22,14 +35,26 @@ func (api *API) CreateClientHandler(context echo.Context) error {
 		return err
 	}
 
-	client := api.db.CreateClient(body)
+	client := api.db.CreateClient(id, body)
 
-	log.Println(fmt.Sprintf("Client created with ID %d.", client.ID))
+	log.Println(fmt.Sprintf("Client created with ID %s.", client.ID))
 	return context.JSON(http.StatusOK, client)
 }
 
 func (api *API) GetAllClientsHandler(context echo.Context) error {
-	clients, err := api.db.GetClients()
+	userId, ok := context.Get("id").(string)
+
+	if !ok {
+		return context.String(http.StatusInternalServerError, "Unexpected error getting User!")
+	}
+
+	id, err := uuid.Parse(userId)
+
+	if err != nil {
+		return context.String(http.StatusInternalServerError, "Unexpected error getting User!")
+	}
+
+	clients, err := api.db.GetClients(id)
 
 	if err != nil {
 		return context.String(http.StatusInternalServerError, "Unexpected error getting Clients!")
@@ -40,39 +65,51 @@ func (api *API) GetAllClientsHandler(context echo.Context) error {
 }
 
 func (api *API) GetClientHandler(context echo.Context) error {
-	idString := context.Param("id")
+	userIdString, ok := context.Get("id").(string)
 
-	if idString == "" {
-		return context.String(http.StatusBadRequest, "ID is required to get a Client!")
+	if !ok {
+		return context.String(http.StatusInternalServerError, "Unexpected error getting User!")
 	}
 
-	id, err := strconv.ParseUint(idString, 10, 32) 
+	userId, err := uuid.Parse(userIdString)
 
 	if err != nil {
-		return context.String(http.StatusInternalServerError, "Unexpected error getting Client!")
+		return context.String(http.StatusInternalServerError, "Unexpected error getting User!")
+	}
+
+	id, err := uuid.Parse(context.Param("id"))
+
+	if err != nil {
+		return context.String(http.StatusBadRequest, "ID is required to get a Client!")
 	}
 
 	var client types.Client
 
-	if err := api.db.GetClient(uint32(id), &client); err != nil {
+	if err := api.db.GetClientById(userId, id, &client); err != nil {
 		return context.String(http.StatusNotFound, "Client not found!")
 	}
 
-	log.Println(fmt.Sprintf("Got User with ID %d.", client.ID))
+	log.Println(fmt.Sprintf("Got User with ID %s.", client.ID))
 	return context.JSON(http.StatusOK, client)
 }
 
 func (api *API) UpdateClientHandler(context echo.Context) error {
-	idString := context.Param("id")
+	userIdString, ok := context.Get("id").(string)
 
-	if idString == "" {
-		return context.String(http.StatusBadRequest, "ID is required to update a Client!")
+	if !ok {
+		return context.String(http.StatusInternalServerError, "Unexpected error getting User!")
 	}
 
-	id, err := strconv.ParseUint(idString, 10, 32) 
+	userId, err := uuid.Parse(userIdString)
 
 	if err != nil {
-		return context.String(http.StatusInternalServerError, "Unexpected error updating Client!")
+		return context.String(http.StatusInternalServerError, "Unexpected error getting User!")
+	}
+
+	id, err := uuid.Parse(context.Param("id"))
+
+	if err != nil {
+		return context.String(http.StatusBadRequest, "ID is required to update a Client!")
 	}
 
 	var body types.UpdateClientRequestBody
@@ -88,33 +125,37 @@ func (api *API) UpdateClientHandler(context echo.Context) error {
 
 	var client types.Client
 
-	if err := api.db.UpdateClient(uint32(id), body, &client); err != nil {
+	if err := api.db.UpdateClient(userId, id, body, &client); err != nil {
 		return context.String(http.StatusNotFound, "Client not found!")
 	}
 
-	log.Println(fmt.Sprintf("Updated Client with ID %d.", client.ID))
+	log.Println(fmt.Sprintf("Updated Client with ID %s.", client.ID))
 	return context.JSON(http.StatusOK, client)
 }
 
 func (api *API) DeleteClientHandler(context echo.Context) error {
-	idString := context.Param("id")
+	userIdString, ok := context.Get("id").(string)
 
-	if idString == "" {
+	if !ok {
+		return context.String(http.StatusInternalServerError, "Unexpected error getting User!")
+	}
+
+	userId, err := uuid.Parse(userIdString)
+
+	if err != nil {
+		return context.String(http.StatusInternalServerError, "Unexpected error getting User!")
+	}
+
+	id, err := uuid.Parse(context.Param("id"))
+
+	if err != nil {
 		return context.String(http.StatusBadRequest, "ID is required to delete a Client!")
 	}
 
-	id, err := strconv.ParseUint(idString, 10, 32) 
-
-	if err != nil {
-		return context.String(http.StatusInternalServerError, "Unexpected error deleting Client!")
-	}
-
-	var client types.Client
-
-	if err := api.db.DeleteClient(uint32(id)); err != nil {
+	if err := api.db.DeleteClient(userId, id); err != nil {
 		return context.String(http.StatusNotFound, "Client not found!")
 	}
 
-	log.Println(fmt.Sprintf("Deleted Client with ID %d.", client.ID))
+	log.Println(fmt.Sprintf("Deleted Client with ID %s.", id))
 	return context.String(http.StatusOK, "Client deleted successfully!")
 }

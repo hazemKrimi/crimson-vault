@@ -1,6 +1,8 @@
 package models
 
 import (
+	"github.com/google/uuid"
+
 	"github.com/hazemKrimi/crimson-vault/internal/types"
 )
 
@@ -8,8 +10,10 @@ func (db *DB) MigrateClients() {
 	db.instance.AutoMigrate(&types.Client{})
 }
 
-func (db *DB) CreateClient(body types.CreateClientRequestBody) types.Client {
+func (db *DB) CreateClient(userId uuid.UUID, body types.CreateClientRequestBody) types.Client {
 	client := types.Client{
+		ID:         uuid.New().String(),
+		UserID:     userId.String(),
 		Name:       body.Name,
 		FiscalCode: body.FiscalCode,
 		Address:    body.Address,
@@ -23,10 +27,10 @@ func (db *DB) CreateClient(body types.CreateClientRequestBody) types.Client {
 	return client
 }
 
-func (db *DB) GetClients() ([]types.Client, error) {
+func (db *DB) GetClients(userId uuid.UUID) ([]types.Client, error) {
 	var clients []types.Client
 
-	result := db.instance.Find(&clients)
+	result := db.instance.Where("user_id = ?", userId).Find(&clients)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -35,8 +39,8 @@ func (db *DB) GetClients() ([]types.Client, error) {
 	return clients, nil
 }
 
-func (db *DB) GetClient(id uint32, client *types.Client) error {
-	result := db.instance.Where("id = ?", id).First(client, id)
+func (db *DB) GetClientById(userId, id uuid.UUID, client *types.Client) error {
+	result := db.instance.Where("user_id = ?", userId).Where("id = ?", id).First(client)
 
 	if result.Error != nil {
 		return result.Error
@@ -45,8 +49,8 @@ func (db *DB) GetClient(id uint32, client *types.Client) error {
 	return nil
 }
 
-func (db *DB) UpdateClient(id uint32, body types.UpdateClientRequestBody, client *types.Client) error {
-	result := db.instance.Where("id = ?", id).First(client, id)
+func (db *DB) UpdateClient(userId, id uuid.UUID, body types.UpdateClientRequestBody, client *types.Client) error {
+	result := db.instance.Where("user_id = ?", userId).Where("id = ?", id).First(client)
 
 	if result.Error != nil {
 		return result.Error
@@ -69,8 +73,8 @@ func (db *DB) UpdateClient(id uint32, body types.UpdateClientRequestBody, client
 	return nil
 }
 
-func (db *DB) DeleteClient(id uint32) error {
-	result := db.instance.Delete(&types.Client{}, id)
+func (db *DB) DeleteClient(userId, id uuid.UUID) error {
+	result := db.instance.Where("user_id = ?", userId).Where("id = ?", id).Delete(&types.Client{})
 
 	if result.Error != nil {
 		return result.Error

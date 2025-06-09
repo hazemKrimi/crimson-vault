@@ -22,6 +22,7 @@ type User struct {
 	Email      string         `json:"email"`
 	Username   string         `json:"username" gorm:"unique"`
 	Password   string         `json:"-"`
+	Clients    []Client				`json:"clients" gorm:"constraint:OnUpdate:CASCADE,onDelete:CASCADE"`
 }
 
 type CreateUserRequestBody struct {
@@ -42,10 +43,10 @@ type UpdateUserRequestBody struct {
 	Country    string `json:"country" validate:"omitempty,alpha"`
 	Phone      string `json:"phone" validate:"omitempty,e164"`
 	Email      string `json:"email" validate:"omitempty,email"`
+	Username   string `json:"username"`
 }
 
-type UpdateUserSecurityDetailsBody struct {
-	Username        string `json:"username"`
+type UpdateUserSecurityCredentialsBody struct {
 	Password        string `json:"password" validate:"password"`
 	ConfirmPassword string `json:"confirmPassword" validate:"password,eqcsfield=Password"`
 }

@@ -15,14 +15,13 @@ func (api *API) ClientRoutes() {
 func (api *API) UserRoutes() {
 	users := api.instance.Group("/api/users")
 
-	users.GET("/", api.GetAllUsersHandler)
 	users.POST("/", api.CreateUserHandler)
-	users.GET("/:id/", api.GetUserHandler)
-	users.PUT("/:id/", api.UpdateUserHandler, api.AuthSessionMiddleware)
-	users.PUT("/:id/security/", api.UpdateUserSecurityDetailsHandler)
-	users.PUT("/:id/logo/", api.UpdateUserLogoHandler, middleware.BodyLimit("2M"))
-	users.DELETE("/:id/", api.DeleteUserHandler, api.AuthSessionMiddleware)
-	users.DELETE("/:id/logo/", api.DeleteUserLogoHandler, api.AuthSessionMiddleware)
+	users.GET("/", api.GetUserHandler, api.AuthSessionMiddleware)
+	users.PUT("/", api.UpdateUserHandler, api.AuthSessionMiddleware)
+	users.PUT("/security/", api.UpdateUserSecurityCredentialsHandler, api.AuthSessionMiddleware)
+	users.PUT("/logo/", api.UpdateUserLogoHandler, middleware.BodyLimit("2M"), api.AuthSessionMiddleware)
+	users.DELETE("/", api.DeleteUserHandler, api.AuthSessionMiddleware)
+	users.DELETE("/logo/", api.DeleteUserLogoHandler, api.AuthSessionMiddleware)
 }
 
 func (api *API) AuthRoutes() {

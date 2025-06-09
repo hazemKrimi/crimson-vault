@@ -10,10 +10,11 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/hazemKrimi/crimson-vault/internal/lib"
-	"github.com/hazemKrimi/crimson-vault/internal/types"
 	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
+
+	"github.com/hazemKrimi/crimson-vault/internal/lib"
+	"github.com/hazemKrimi/crimson-vault/internal/types"
 )
 
 func (api *API) CreateUserHandler(context echo.Context) error {
@@ -63,10 +64,16 @@ func (api *API) GetAllUsersHandler(context echo.Context) error {
 }
 
 func (api *API) GetUserHandler(context echo.Context) error {
-	id, err := uuid.Parse(context.Param("id"))
+	userId, ok := context.Get("id").(string)
+
+	if !ok {
+		return context.String(http.StatusInternalServerError, "Unexpected error getting User!")
+	}
+
+	id, err := uuid.Parse(userId)
 
 	if err != nil {
-		return context.String(http.StatusBadRequest, "ID is required to get a User!")
+		return context.String(http.StatusInternalServerError, "Unexpected error getting User!")
 	}
 
 	var user types.User
@@ -80,10 +87,16 @@ func (api *API) GetUserHandler(context echo.Context) error {
 }
 
 func (api *API) UpdateUserHandler(context echo.Context) error {
-	id, err := uuid.Parse(context.Param("id"))
+	userId, ok := context.Get("id").(string)
+
+	if !ok {
+		return context.String(http.StatusInternalServerError, "Unexpected error updating User!")
+	}
+
+	id, err := uuid.Parse(userId)
 
 	if err != nil {
-		return context.String(http.StatusBadRequest, "ID is required to update a User!")
+		return context.String(http.StatusInternalServerError, "Unexpected error updating User!")
 	}
 
 	var body types.UpdateUserRequestBody
@@ -107,14 +120,20 @@ func (api *API) UpdateUserHandler(context echo.Context) error {
 	return context.JSON(http.StatusOK, user)
 }
 
-func (api *API) UpdateUserSecurityDetailsHandler(context echo.Context) error {
-	id, err := uuid.Parse(context.Param("id"))
+func (api *API) UpdateUserSecurityCredentialsHandler(context echo.Context) error {
+	userId, ok := context.Get("id").(string)
 
-	if err != nil {
-		return context.String(http.StatusBadRequest, "ID is required to create security details for a User!")
+	if !ok {
+		return context.String(http.StatusInternalServerError, "Unexpected error updating User security credentials!")
 	}
 
-	var body types.UpdateUserSecurityDetailsBody
+	id, err := uuid.Parse(userId)
+
+	if err != nil {
+		return context.String(http.StatusInternalServerError, "Unexpected error updating User security credentials!")
+	}
+
+	var body types.UpdateUserSecurityCredentialsBody
 
 	if err := context.Bind(&body); err != nil {
 		log.Println(fmt.Sprintf("Error creating security details for User: %v.", err))
@@ -127,7 +146,7 @@ func (api *API) UpdateUserSecurityDetailsHandler(context echo.Context) error {
 
 	var user types.User
 
-	if err := api.db.UpdateUserSecurityDetails(id, body, &user); err != nil {
+	if err := api.db.UpdateUserSecurityCredentials(id, body, &user); err != nil {
 		return context.String(http.StatusNotFound, "User not found!")
 	}
 
@@ -136,10 +155,16 @@ func (api *API) UpdateUserSecurityDetailsHandler(context echo.Context) error {
 }
 
 func (api *API) UpdateUserLogoHandler(context echo.Context) error {
-	id, err := uuid.Parse(context.Param("id"))
+	userId, ok := context.Get("id").(string)
+
+	if !ok {
+		return context.String(http.StatusInternalServerError, "Unexpected error updating User logo!")
+	}
+
+	id, err := uuid.Parse(userId)
 
 	if err != nil {
-		return context.String(http.StatusBadRequest, "ID is required to update logo for User!")
+		return context.String(http.StatusInternalServerError, "Unexpected error updating User logo!")
 	}
 
 	var user types.User
@@ -156,7 +181,7 @@ func (api *API) UpdateUserLogoHandler(context echo.Context) error {
 
 	if err != nil {
 		log.Println(fmt.Sprintf("Error updating logo for User: %v.", err))
-		return context.String(http.StatusInternalServerError, "Unexpected error while updating logo for User!")
+		return context.String(http.StatusBadRequest, "No image has been uploaded!")
 	}
 
 	ext := strings.ToLower(filepath.Ext(file.Filename))
@@ -220,10 +245,16 @@ func (api *API) UpdateUserLogoHandler(context echo.Context) error {
 }
 
 func (api *API) DeleteUserHandler(context echo.Context) error {
-	id, err := uuid.Parse(context.Param("id"))
+	userId, ok := context.Get("id").(string)
+
+	if !ok {
+		return context.String(http.StatusInternalServerError, "Unexpected error deleting User!")
+	}
+
+	id, err := uuid.Parse(userId)
 
 	if err != nil {
-		return context.String(http.StatusBadRequest, "ID is required to delete a User!")
+		return context.String(http.StatusInternalServerError, "Unexpected error deleting User!")
 	}
 
 	if err := api.db.DeleteUser(id); err != nil {
@@ -235,10 +266,16 @@ func (api *API) DeleteUserHandler(context echo.Context) error {
 }
 
 func (api *API) DeleteUserLogoHandler(context echo.Context) error {
-	id, err := uuid.Parse(context.Param("id"))
+	userId, ok := context.Get("id").(string)
+
+	if !ok {
+		return context.String(http.StatusInternalServerError, "Unexpected error deleting User logo!")
+	}
+
+	id, err := uuid.Parse(userId)
 
 	if err != nil {
-		return context.String(http.StatusBadRequest, "ID is required to delete logo of User!")
+		return context.String(http.StatusInternalServerError, "Unexpected error deleting User logo!")
 	}
 
 	var user types.User
