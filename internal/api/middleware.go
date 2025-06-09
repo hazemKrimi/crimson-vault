@@ -36,6 +36,7 @@ func (api *API) AuthSessionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return context.String(http.StatusUnauthorized, "User not authenticated!")
 		}
 
+		context.Set("id", sess.Values["id"])
 		context.Set("sessionId", sess.Values["sessionId"])
 		context.Set("username", sess.Values["username"])
 

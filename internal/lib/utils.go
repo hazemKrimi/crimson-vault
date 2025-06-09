@@ -43,6 +43,7 @@ func CreateSession(session *sessions.Session, context echo.Context, user *types.
 		MaxAge:   3600,
 		HttpOnly: true,
 	}
+	session.Values["id"] = user.ID
 	session.Values["sessionId"] = user.SessionID
 	session.Values["username"] = user.Username
 

@@ -15,8 +15,8 @@ import (
 
 type API struct {
 	ConfigDirectory string
-	instance  *echo.Echo
-	db        *models.DB
+	instance        *echo.Echo
+	db              *models.DB
 }
 
 func (api *API) Initialize() {
@@ -34,15 +34,17 @@ func (api *API) Initialize() {
 	api.instance = ech
 	api.db = db
 
+	// TODO: Update with appropriate origins when finishing v1
 	api.instance.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 	}))
 	// TODO: Change and store the secret separately when finilizing v1.
 	api.instance.Use(session.Middleware(sessions.NewCookieStore([]byte("SECRET"))))
-	
+	api.instance.Pre(middleware.AddTrailingSlash())
+
 	api.ClientRoutes()
 	api.UserRoutes()
 	api.AuthRoutes()
-	
+
 	api.instance.Logger.Fatal(api.instance.Start(fmt.Sprintf(":%d", lib.DEFAULT_PORT)))
 }

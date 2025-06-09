@@ -79,6 +79,8 @@ func (api *API) LogoutHandler(context echo.Context) error {
 		return context.String(http.StatusInternalServerError, "Unexpected error deleting User session!")
 	}
 
-	log.Println(fmt.Sprintf("User with SessionID %s logged out.", sessionId))
+	id := context.Get("id")
+
+	log.Println(fmt.Sprintf("User with ID %s logged out.", id))
 	return context.String(http.StatusOK, "Logged out successfully!")
 }
