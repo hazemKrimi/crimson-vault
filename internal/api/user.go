@@ -7,9 +7,9 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/hazemKrimi/crimson-vault/internal/lib"
 	"github.com/hazemKrimi/crimson-vault/internal/types"
 	"github.com/labstack/echo-contrib/session"
@@ -28,21 +28,26 @@ func (api *API) CreateUserHandler(context echo.Context) error {
 		return err
 	}
 
-	user := api.db.CreateUser(body)
+	user, err := api.db.CreateUser(body)
+
+	if err != nil {
+		log.Println(fmt.Sprintf("Error creating User: %v.", err))
+		return context.String(http.StatusInternalServerError, "Unexpected error creating User!")
+	}
+
 	sess, err := session.Get("session", context)
 
 	if err != nil {
-		api.db.DeleteUser(user.ID)
-		return context.String(http.StatusInternalServerError, "Unexpected error saving User session!")
+		log.Println(fmt.Sprintf("Error creating User session: %v.", err))
+		return context.String(http.StatusInternalServerError, "Unexpected error creating User session!")
 	}
 
-	lib.ConstructSession(sess, user)
-
-	if err := sess.Save(context.Request(), context.Response()); err != nil {
-		return context.String(http.StatusInternalServerError, "Unexpected error saving User session!")
+	if err := lib.CreateSession(sess, context, &user); err != nil {
+		log.Println(fmt.Sprintf("Error creating User session: %v.", err))
+		return context.String(http.StatusInternalServerError, "Unexpected error creating User session!")
 	}
 
-	log.Println(fmt.Sprintf("User created with ID %d.", user.ID))
+	log.Println(fmt.Sprintf("User created with ID %s.", user.ID))
 	return context.JSON(http.StatusOK, user)
 }
 
@@ -58,39 +63,27 @@ func (api *API) GetAllUsersHandler(context echo.Context) error {
 }
 
 func (api *API) GetUserHandler(context echo.Context) error {
-	idString := context.Param("id")
-
-	if idString == "" {
-		return context.String(http.StatusBadRequest, "ID is required to get a User!")
-	}
-
-	id, err := strconv.ParseUint(idString, 10, 32)
+	id, err := uuid.Parse(context.Param("id"))
 
 	if err != nil {
-		return context.String(http.StatusInternalServerError, "Unexpected error getting User!")
+		return context.String(http.StatusBadRequest, "ID is required to get a User!")
 	}
 
 	var user types.User
 
-	if err := api.db.GetUser(uint32(id), &user); err != nil {
+	if err := api.db.GetUserById(id, &user); err != nil {
 		return context.String(http.StatusNotFound, "User not found!")
 	}
 
-	log.Println(fmt.Sprintf("Got User with ID %d.", user.ID))
+	log.Println(fmt.Sprintf("Got User with ID %s.", user.ID))
 	return context.JSON(http.StatusOK, user)
 }
 
 func (api *API) UpdateUserHandler(context echo.Context) error {
-	idString := context.Param("id")
-
-	if idString == "" {
-		return context.String(http.StatusBadRequest, "ID is required to update a User!")
-	}
-
-	id, err := strconv.ParseUint(idString, 10, 32)
+	id, err := uuid.Parse(context.Param("id"))
 
 	if err != nil {
-		return context.String(http.StatusInternalServerError, "Unexpected error updating User!")
+		return context.String(http.StatusBadRequest, "ID is required to update a User!")
 	}
 
 	var body types.UpdateUserRequestBody
@@ -106,25 +99,19 @@ func (api *API) UpdateUserHandler(context echo.Context) error {
 
 	var user types.User
 
-	if err := api.db.UpdateUser(uint32(id), body, &user); err != nil {
+	if err := api.db.UpdateUser(id, body, &user); err != nil {
 		return context.String(http.StatusNotFound, "User not found!")
 	}
 
-	log.Println(fmt.Sprintf("Updated user with ID %d.", user.ID))
+	log.Println(fmt.Sprintf("Updated user with ID %s.", user.ID))
 	return context.JSON(http.StatusOK, user)
 }
 
 func (api *API) UpdateUserSecurityDetailsHandler(context echo.Context) error {
-	idString := context.Param("id")
-
-	if idString == "" {
-		return context.String(http.StatusBadRequest, "ID is required to create security details for a User!")
-	}
-
-	id, err := strconv.ParseUint(idString, 10, 32)
+	id, err := uuid.Parse(context.Param("id"))
 
 	if err != nil {
-		return context.String(http.StatusInternalServerError, "Unexpected error while creating security details for User!")
+		return context.String(http.StatusBadRequest, "ID is required to create security details for a User!")
 	}
 
 	var body types.UpdateUserSecurityDetailsBody
@@ -140,30 +127,24 @@ func (api *API) UpdateUserSecurityDetailsHandler(context echo.Context) error {
 
 	var user types.User
 
-	if err := api.db.UpdateUserSecurityDetails(uint32(id), body, &user); err != nil {
+	if err := api.db.UpdateUserSecurityDetails(id, body, &user); err != nil {
 		return context.String(http.StatusNotFound, "User not found!")
 	}
 
-	log.Println(fmt.Sprintf("Updated security details of user with ID %d.", user.ID))
+	log.Println(fmt.Sprintf("Updated security details of user with ID %s.", user.ID))
 	return context.JSON(http.StatusOK, user)
 }
 
 func (api *API) UpdateUserLogoHandler(context echo.Context) error {
-	idString := context.Param("id")
-
-	if idString == "" {
-		return context.String(http.StatusBadRequest, "ID is required to update logo for User!")
-	}
-
-	id, err := strconv.ParseUint(idString, 10, 32)
+	id, err := uuid.Parse(context.Param("id"))
 
 	if err != nil {
-		return context.String(http.StatusInternalServerError, "Unexpected error updating logo for User!")
+		return context.String(http.StatusBadRequest, "ID is required to update logo for User!")
 	}
 
 	var user types.User
 
-	if err := api.db.GetUser(uint32(id), &user); err != nil {
+	if err := api.db.GetUserById(id, &user); err != nil {
 		return context.String(http.StatusNotFound, "User not found!")
 	}
 
@@ -239,19 +220,13 @@ func (api *API) UpdateUserLogoHandler(context echo.Context) error {
 }
 
 func (api *API) DeleteUserHandler(context echo.Context) error {
-	idString := context.Param("id")
+	id, err := uuid.Parse(context.Param("id"))
 
-	if idString == "" {
+	if err != nil {
 		return context.String(http.StatusBadRequest, "ID is required to delete a User!")
 	}
 
-	id, err := strconv.ParseUint(idString, 10, 32)
-
-	if err != nil {
-		return context.String(http.StatusInternalServerError, "Unexpected error deleting User!")
-	}
-
-	if err := api.db.DeleteUser(uint32(id)); err != nil {
+	if err := api.db.DeleteUser(id); err != nil {
 		return context.String(http.StatusNotFound, "User not found!")
 	}
 
@@ -260,22 +235,15 @@ func (api *API) DeleteUserHandler(context echo.Context) error {
 }
 
 func (api *API) DeleteUserLogoHandler(context echo.Context) error {
-	idString := context.Param("id")
-
-	if idString == "" {
-		return context.String(http.StatusBadRequest, "ID is required to delete logo of User!")
-	}
-
-	id, err := strconv.ParseUint(idString, 10, 32)
+	id, err := uuid.Parse(context.Param("id"))
 
 	if err != nil {
-		log.Println(fmt.Sprintf("Error deleting logo of User: %v.", err))
-		return context.String(http.StatusInternalServerError, "Unexpected error deleting logo of User!")
+		return context.String(http.StatusBadRequest, "ID is required to delete logo of User!")
 	}
 
 	var user types.User
 
-	if err := api.db.GetUser(uint32(id), &user); err != nil {
+	if err := api.db.GetUserById(id, &user); err != nil {
 		return context.String(http.StatusNotFound, "User not found!")
 	}
 
@@ -286,6 +254,6 @@ func (api *API) DeleteUserLogoHandler(context echo.Context) error {
 		return context.String(http.StatusInternalServerError, "Unexpected error deleting logo of User!")
 	}
 
-	log.Println(fmt.Sprintf("Deleted logo of User with ID %d.", user.ID))
+	log.Println(fmt.Sprintf("Deleted logo of User with ID %s.", user.ID))
 	return context.String(http.StatusOK, "User logo deleted successfully!")
 }

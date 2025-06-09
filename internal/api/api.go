@@ -4,10 +4,10 @@ import (
 	"fmt"
 
 	"github.com/go-playground/validator/v10"
+	"github.com/gorilla/sessions"
+	"github.com/labstack/echo-contrib/session"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/labstack/echo-contrib/session"
-	"github.com/gorilla/sessions"
 
 	"github.com/hazemKrimi/crimson-vault/internal/lib"
 	"github.com/hazemKrimi/crimson-vault/internal/models"
@@ -34,12 +34,15 @@ func (api *API) Initialize() {
 	api.instance = ech
 	api.db = db
 
-	// TODO: Change and store the secret separately when finilizing v1.
-	api.instance.Use(session.Middleware(sessions.NewCookieStore([]byte("SECRET"))))
 	api.instance.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
 	}))
+	// TODO: Change and store the secret separately when finilizing v1.
+	api.instance.Use(session.Middleware(sessions.NewCookieStore([]byte("SECRET"))))
+	
 	api.ClientRoutes()
 	api.UserRoutes()
+	api.AuthRoutes()
+	
 	api.instance.Logger.Fatal(api.instance.Start(fmt.Sprintf(":%d", lib.DEFAULT_PORT)))
 }

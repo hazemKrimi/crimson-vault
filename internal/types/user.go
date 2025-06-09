@@ -7,7 +7,8 @@ import (
 )
 
 type User struct {
-	ID         uint32         `json:"id"`
+	ID         string         `json:"id" gorm:"primaryKey"`
+	SessionID  string         `json:"-"`
 	CreatedAt  time.Time      `json:"createAt"`
 	UpdatedAt  time.Time      `json:"updatedAt"`
 	DeletedAt  gorm.DeletedAt `json:"deletedAt" gorm:"index"`
@@ -19,8 +20,8 @@ type User struct {
 	Country    string         `json:"country"`
 	Phone      string         `json:"phone"`
 	Email      string         `json:"email"`
-	Username   string         `json:"username"`
-	Password   string         `json:"password"`
+	Username   string         `json:"username" gorm:"unique"`
+	Password   string         `json:"-"`
 }
 
 type CreateUserRequestBody struct {
