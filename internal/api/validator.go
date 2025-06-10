@@ -6,7 +6,8 @@ import (
 	"regexp"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/labstack/echo/v4"
+
+	"github.com/hazemKrimi/crimson-vault/internal/types"
 )
 
 type CustomValidator struct {
@@ -16,7 +17,7 @@ type CustomValidator struct {
 func (v *CustomValidator) Validate(i any) error {
 	if err := v.validator.Struct(i); err != nil {
 		if validationErrors, ok := err.(validator.ValidationErrors); ok {
-			errors := make(map[string]string)
+			errors := make([]string, 0, 10)
 
 			for _, ve := range validationErrors {
 				field := ve.Field()
@@ -41,9 +42,9 @@ func (v *CustomValidator) Validate(i any) error {
 					msg = fmt.Sprintf("%s is not valid!", field)
 				}
 
-				errors[field] = msg
+				errors = append(errors, msg)
 			}
-			return echo.NewHTTPError(http.StatusBadRequest, errors)
+			return types.Error{Code: http.StatusBadRequest, Messages: errors}
 		}
 	}
 

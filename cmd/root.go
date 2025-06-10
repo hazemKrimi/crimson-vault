@@ -5,6 +5,7 @@ package cmd
 
 import (
 	"log"
+	"log/slog"
 	"os"
 
 	"github.com/hazemKrimi/crimson-vault/internal/api"
@@ -35,7 +36,8 @@ to quickly create a Cobra application.`,
 			log.Fatal(err)
 		}
 
-		server := api.API{ConfigDirectory: dir}
+		logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
+		server := api.API{ConfigDirectory: dir, Logger: logger}
 		server.Initialize()
 	},
 }

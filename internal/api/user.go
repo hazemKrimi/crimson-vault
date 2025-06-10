@@ -180,8 +180,7 @@ func (api *API) UpdateUserLogoHandler(context echo.Context) error {
 	file, err := context.FormFile("logo")
 
 	if err != nil {
-		log.Println(fmt.Sprintf("Error updating logo for User: %v.", err))
-		return context.String(http.StatusBadRequest, "No image has been uploaded!")
+		return types.Error{Code: http.StatusBadRequest, Messages: []string{"No image has been uploaded!"}}
 	}
 
 	ext := strings.ToLower(filepath.Ext(file.Filename))
