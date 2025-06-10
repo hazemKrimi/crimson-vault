@@ -12,7 +12,6 @@ import (
 
 	"github.com/hazemKrimi/crimson-vault/internal/lib"
 	"github.com/hazemKrimi/crimson-vault/internal/models"
-	"github.com/hazemKrimi/crimson-vault/internal/types"
 )
 
 type API struct {
@@ -28,20 +27,6 @@ func (api *API) Initialize() {
 
 	db := &models.DB{}
 	ech := echo.New()
-	ech.Validator = &CustomValidator{validator: validator}
-	ech.HTTPErrorHandler = func(err error, context echo.Context) {
-		if context.Response().Committed {
-			return
-		}
-
-		custom, ok := err.(types.Error)
-
-		if ok {
-			context.JSONPretty(custom.Code, map[string][]string{"errors": custom.Messages}, " ")
-		}
-
-		ech.DefaultHTTPErrorHandler(err, context)
-	}
 
 	db.Connect(api.ConfigDirectory)
 	db.MigrateClients()
@@ -49,6 +34,9 @@ func (api *API) Initialize() {
 
 	api.instance = ech
 	api.db = db
+
+	api.instance.Validator = &CustomValidator{validator: validator}
+	api.instance.HTTPErrorHandler = api.CustomErrorHandler
 
 	api.instance.Use(api.LoggerMiddleware())
 	// TODO: Update with appropriate origins when finishing v1

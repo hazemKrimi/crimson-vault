@@ -27,7 +27,7 @@ func GetConfigDirectory() (string, error) {
 
 func SaveSession(session *sessions.Session, context echo.Context) error {
 	if err := session.Save(context.Request(), context.Response()); err != nil {
-		return context.String(http.StatusInternalServerError, "Unexpected error saving User session!")
+		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error saving User session!"}}
 	}
 
 	return nil
@@ -35,7 +35,7 @@ func SaveSession(session *sessions.Session, context echo.Context) error {
 
 func CreateSession(session *sessions.Session, context echo.Context, user *types.User) error {
 	if err := uuid.Validate(user.SessionID); err != nil {
-		return context.String(http.StatusInternalServerError, "Unexpected error saving User session!")
+		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error saving User session!"}}
 	}
 
 	session.Options = &sessions.Options{
@@ -48,7 +48,7 @@ func CreateSession(session *sessions.Session, context echo.Context, user *types.
 	session.Values["username"] = user.Username
 
 	if err := SaveSession(session, context); err != nil {
-		return context.String(http.StatusInternalServerError, "Unexpected error saving User session!")
+		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error saving User session!"}}
 	}
 
 	return nil
@@ -58,7 +58,7 @@ func DeleteSession(session *sessions.Session, context echo.Context) error {
 	session.Options.MaxAge = -1
 
 	if err := SaveSession(session, context); err != nil {
-		return context.String(http.StatusInternalServerError, "Unexpected error saving User session!")
+		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error saving User session!"}}
 	}
 
 	return nil

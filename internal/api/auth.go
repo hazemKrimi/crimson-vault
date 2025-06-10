@@ -1,8 +1,7 @@
 package api
 
 import (
-	"fmt"
-	"log"
+	"errors"
 	"net/http"
 
 	"github.com/labstack/echo-contrib/session"
@@ -16,8 +15,7 @@ func (api *API) LoginHandler(context echo.Context) error {
 	var body types.LoginRequestBody
 
 	if err := context.Bind(&body); err != nil {
-		log.Println(fmt.Sprintf("Error logging User in: %v.", err))
-		return context.String(http.StatusBadRequest, "Invalid JSON!")
+		return types.Error{Code: http.StatusBadRequest, Messages: []string{"Invalid JSON!"}}
 	}
 
 	if err := context.Validate(body); err != nil {
@@ -27,31 +25,27 @@ func (api *API) LoginHandler(context echo.Context) error {
 	var user types.User
 
 	if err := api.db.GetUserByUsername(body.Username, &user); err != nil {
-		return context.String(http.StatusNotFound, "User not found!")
+		return types.Error{Code: http.StatusNotFound, Messages: []string{"User not found!"}}
 	}
 
 	if match := lib.CheckPasswordHash(body.Password, user.Password); !match {
-		return context.String(http.StatusBadRequest, "Invalid credentials!")
+		return types.Error{Code: http.StatusBadRequest, Messages: []string{"Invalid credentials!"}}
 	}
 
 	sess, err := session.Get("session", context)
 
 	if err != nil {
-		log.Println(fmt.Sprintf("Error creating User session: %v.", err))
-		return context.String(http.StatusInternalServerError, "Unexpected error creating User session!")
+		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error creating User session!"}}
 	}
 
 	if err := api.db.UpdateUserSessionID(&user); err != nil {
-		log.Println(fmt.Sprintf("Error creating User session: %v.", err))
-		return context.String(http.StatusInternalServerError, "Unexpected error creating User session!")
+		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error creating User session!"}}
 	}
 
 	if err := lib.CreateSession(sess, context, &user); err != nil {
-		log.Println(fmt.Sprintf("Error creating User session: %v.", err))
-		return context.String(http.StatusInternalServerError, "Unexpected error creating User session!")
+		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error creating User session!"}}
 	}
 
-	log.Println(fmt.Sprintf("User with ID %s logged in.", user.ID))
 	return context.JSON(http.StatusOK, user)
 }
 
@@ -59,28 +53,22 @@ func (api *API) LogoutHandler(context echo.Context) error {
 	sessionId, ok := context.Get("sessionId").(string)
 
 	if !ok {
-		return context.String(http.StatusInternalServerError, "Unexpected error deleting User session!")
+		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Session ID not found after authorization."), Messages: []string{"Unexpected error deleting User session!"}}
 	}
 
 	if err := api.db.DeleteUserSessionID(sessionId); err != nil {
-		log.Println(fmt.Sprintf("Error deleting User session: %v.", err))
-		return context.String(http.StatusInternalServerError, "Unexpected error deleting User session!")
+		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error deleting User session!"}}
 	}
 
 	sess, err := session.Get("session", context)
 
 	if err != nil {
-		log.Println(fmt.Sprintf("Error deleting User session: %v.", err))
-		return context.String(http.StatusInternalServerError, "Unexpected error deleting User session!")
+		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error deleting User session!"}}
 	}
 
 	if err := lib.DeleteSession(sess, context); err != nil {
-		log.Println(fmt.Sprintf("Error deleting User session: %v.", err))
-		return context.String(http.StatusInternalServerError, "Unexpected error deleting User session!")
+		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error deleting User session!"}}
 	}
 
-	id := context.Get("id")
-
-	log.Println(fmt.Sprintf("User with ID %s logged out.", id))
-	return context.String(http.StatusOK, "Logged out successfully!")
+	return context.JSON(http.StatusOK, map[string]string{"message":"Logged out successfully!"})
 }

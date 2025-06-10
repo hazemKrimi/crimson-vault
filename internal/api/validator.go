@@ -17,7 +17,7 @@ type CustomValidator struct {
 func (v *CustomValidator) Validate(i any) error {
 	if err := v.validator.Struct(i); err != nil {
 		if validationErrors, ok := err.(validator.ValidationErrors); ok {
-			errors := make([]string, 0, 10)
+			errs := make([]string, 0, 10)
 
 			for _, ve := range validationErrors {
 				field := ve.Field()
@@ -42,9 +42,9 @@ func (v *CustomValidator) Validate(i any) error {
 					msg = fmt.Sprintf("%s is not valid!", field)
 				}
 
-				errors = append(errors, msg)
+				errs = append(errs, msg)
 			}
-			return types.Error{Code: http.StatusBadRequest, Messages: errors}
+			return types.Error{Code: http.StatusBadRequest, Messages: errs}
 		}
 	}
 
