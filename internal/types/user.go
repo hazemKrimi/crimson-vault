@@ -7,7 +7,7 @@ import (
 )
 
 type User struct {
-	ID         string         `json:"id" gorm:"primaryKey"`
+	ID         string         `json:"id" gorm:"type:varchar(255);primaryKey"`
 	SessionID  string         `json:"-"`
 	CreatedAt  time.Time      `json:"createAt"`
 	UpdatedAt  time.Time      `json:"updatedAt"`
@@ -22,7 +22,7 @@ type User struct {
 	Email      string         `json:"email"`
 	Username   string         `json:"username" gorm:"unique"`
 	Password   string         `json:"-"`
-	Clients    []Client				`json:"clients" gorm:"constraint:OnUpdate:CASCADE,onDelete:CASCADE"`
+	Clients    []Client				`json:"clients" gorm:"constraint:onDelete:CASCADE"`
 }
 
 type CreateUserRequestBody struct {

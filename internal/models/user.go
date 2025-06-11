@@ -9,10 +9,6 @@ import (
 	"github.com/hazemKrimi/crimson-vault/internal/types"
 )
 
-func (db *DB) MigrateUsers() {
-	db.instance.AutoMigrate(&types.User{})
-}
-
 func (db *DB) CreateUser(body types.CreateUserRequestBody) (types.User, error) {
 	user := types.User{
 		ID:         uuid.New().String(),
@@ -38,7 +34,7 @@ func (db *DB) CreateUser(body types.CreateUserRequestBody) (types.User, error) {
 func (db *DB) GetUsers() ([]types.User, error) {
 	var users []types.User
 
-	result := db.instance.Find(&users)
+	result := db.instance.Model(&types.User{}).Preload("Clients").Find(&users)
 
 	if result.Error != nil {
 		return nil, result.Error
@@ -48,7 +44,7 @@ func (db *DB) GetUsers() ([]types.User, error) {
 }
 
 func (db *DB) GetUserById(id uuid.UUID, user *types.User) error {
-	result := db.instance.Where("id = ?", id).First(user)
+	result := db.instance.Model(&types.User{}).Preload("Clients").Where("id = ?", id).First(user)
 
 	if result.Error != nil {
 		return result.Error

@@ -33,7 +33,11 @@ func (api *API) CreateClientHandler(context echo.Context) error {
 		return err
 	}
 
-	client := api.db.CreateClient(id, body)
+	client, err := api.db.CreateClient(id, body)
+
+	if err != nil {
+		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error creating User!"}}
+	}
 
 	return context.JSON(http.StatusOK, client)
 }

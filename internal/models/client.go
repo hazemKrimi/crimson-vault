@@ -6,11 +6,7 @@ import (
 	"github.com/hazemKrimi/crimson-vault/internal/types"
 )
 
-func (db *DB) MigrateClients() {
-	db.instance.AutoMigrate(&types.Client{})
-}
-
-func (db *DB) CreateClient(userId uuid.UUID, body types.CreateClientRequestBody) types.Client {
+func (db *DB) CreateClient(userId uuid.UUID, body types.CreateClientRequestBody) (types.Client, error) {
 	client := types.Client{
 		ID:         uuid.New().String(),
 		UserID:     userId.String(),
@@ -23,8 +19,13 @@ func (db *DB) CreateClient(userId uuid.UUID, body types.CreateClientRequestBody)
 		Email:      body.Email,
 	}
 
-	db.instance.Create(&client)
-	return client
+	result := db.instance.Create(&client)
+
+	if result.Error != nil {
+		return types.Client{}, result.Error
+	}
+
+	return client, nil
 }
 
 func (db *DB) GetClients(userId uuid.UUID) ([]types.Client, error) {

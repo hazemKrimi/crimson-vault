@@ -29,8 +29,6 @@ func (api *API) Initialize() {
 	ech := echo.New()
 
 	db.Connect(api.ConfigDirectory)
-	db.MigrateClients()
-	db.MigrateUsers()
 
 	api.instance = ech
 	api.db = db
