@@ -36,7 +36,7 @@ func (api *API) AuthSessionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		var user types.User
 
 		if err := api.db.GetUserBySessionId(sessionId, &user); err != nil {
-			return types.Error{Code: http.StatusUnauthorized, Messages: []string{"User not authenticated!"}}
+			return types.Error{Code: http.StatusNotFound, Messages: []string{"User not found!"}}
 		}
 
 		context.Set("id", sess.Values["id"])
