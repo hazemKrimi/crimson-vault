@@ -51,7 +51,7 @@ func (api *API) GetAllUsersHandler(context echo.Context) error {
 	users, err := api.db.GetUsers()
 
 	if err != nil {
-		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error getting User!"}}
+		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error getting Users!"}}
 	}
 
 	return context.JSON(http.StatusOK, users)

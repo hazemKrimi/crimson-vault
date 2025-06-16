@@ -25,6 +25,21 @@ func (api *API) UserRoutes() {
 	users.DELETE("/me/logo/", api.DeleteUserLogoHandler, api.AuthSessionMiddleware)
 }
 
+func (api *API) InvoiceRoutes() {
+	invoices := api.instance.Group("/api/invoices", api.AuthSessionMiddleware)
+
+	invoices.GET("/", api.GetAllInvoicesHandler)
+	invoices.POST("/", api.CreateInvoiceHandler)
+	invoices.POST("/:id/items/", api.CreateItemHandler)
+	invoices.GET("/:id/", api.GetInvoiceHandler)
+	invoices.GET("/:id/items/", api.GetAllItemsHandler)
+	invoices.GET("/items/:id/", api.GetItemHandler)
+	invoices.PUT("/:id/", api.UpdateInvoiceHandler)
+	invoices.PUT("/items/:id/", api.UpdateItemHandler)
+	invoices.DELETE("/:id/", api.DeleteInvoiceHandler)
+	invoices.DELETE("/items/:id/", api.DeleteItemHandler)
+}
+
 func (api *API) AuthRoutes() {
 	auth := api.instance.Group("/api/auth")
 

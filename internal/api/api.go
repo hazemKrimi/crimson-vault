@@ -45,9 +45,10 @@ func (api *API) Initialize() {
 	api.instance.Use(session.Middleware(sessions.NewCookieStore([]byte("SECRET"))))
 	api.instance.Pre(middleware.AddTrailingSlash())
 
-	api.ClientRoutes()
-	api.UserRoutes()
 	api.AuthRoutes()
+	api.UserRoutes()
+	api.ClientRoutes()
+	api.InvoiceRoutes()
 
 	api.instance.Logger.Fatal(api.instance.Start(fmt.Sprintf(":%d", lib.DEFAULT_PORT)))
 }

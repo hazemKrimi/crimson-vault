@@ -34,6 +34,8 @@ func (v *CustomValidator) Validate(i any) error {
 					msg = fmt.Sprintf("%s must only contain alphabetic characters!", field)
 				case "e164":
 					msg = fmt.Sprintf("%s must be a valid phone number in e164 format!", field)
+				case "iso4217":
+					msg = fmt.Sprintf("%s must be a valid currency in iso4217 format!", field)
 				case "password":
 					msg = fmt.Sprintf("%s must have at lease one uppercase, one lowercase, one number and one special character!", field)
 				case "eqcsfield":
