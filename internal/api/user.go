@@ -58,16 +58,10 @@ func (api *API) GetAllUsersHandler(context echo.Context) error {
 }
 
 func (api *API) GetUserHandler(context echo.Context) error {
-	userId, ok := context.Get("id").(string)
-
-	if !ok {
-		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Session ID not found after authorization."), Messages: []string{"Unexpected error getting User!"}}
-	}
-
-	id, err := uuid.Parse(userId)
+	id, err := uuid.Parse(context.Get("id").(string))
 
 	if err != nil {
-		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error getting User!"}}
+		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Session ID not found after authorization."), Messages: []string{"Unexpected error getting User!"}}
 	}
 
 	var user types.User
@@ -80,16 +74,10 @@ func (api *API) GetUserHandler(context echo.Context) error {
 }
 
 func (api *API) UpdateUserHandler(context echo.Context) error {
-	userId, ok := context.Get("id").(string)
-
-	if !ok {
-		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Session ID not found after authorization."), Messages: []string{"Unexpected error updating User!"}}
-	}
-
-	id, err := uuid.Parse(userId)
+	id, err := uuid.Parse(context.Get("id").(string))
 
 	if err != nil {
-		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error updating User!"}}
+		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Session ID not found after authorization."), Messages: []string{"Unexpected error updating User!"}}
 	}
 
 	var body types.UpdateUserRequestBody
@@ -118,16 +106,10 @@ func (api *API) UpdateUserHandler(context echo.Context) error {
 }
 
 func (api *API) UpdateUserSecurityCredentialsHandler(context echo.Context) error {
-	userId, ok := context.Get("id").(string)
-
-	if !ok {
-		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Session ID not found after authorization."), Messages: []string{"Unexpected error updating User security credentials!"}}
-	}
-
-	id, err := uuid.Parse(userId)
+	id, err := uuid.Parse(context.Get("id").(string))
 
 	if err != nil {
-		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error updating User security credentials!"}}
+		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Session ID not found after authorization."), Messages: []string{"Unexpected error updating User security credentials!"}}
 	}
 
 	var body types.UpdateUserSecurityCredentialsBody
@@ -150,16 +132,10 @@ func (api *API) UpdateUserSecurityCredentialsHandler(context echo.Context) error
 }
 
 func (api *API) UpdateUserLogoHandler(context echo.Context) error {
-	userId, ok := context.Get("id").(string)
-
-	if !ok {
-		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Session ID not found after authorization."), Messages: []string{"Unexpected error updating User logo!"}}
-	}
-
-	id, err := uuid.Parse(userId)
+	id, err := uuid.Parse(context.Get("id").(string))
 
 	if err != nil {
-		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error updating User logo!"}}
+		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Session ID not found after authorization."), Messages: []string{"Unexpected error updating User logo!"}}
 	}
 
 	var user types.User
@@ -234,16 +210,10 @@ func (api *API) UpdateUserLogoHandler(context echo.Context) error {
 }
 
 func (api *API) DeleteUserHandler(context echo.Context) error {
-	userId, ok := context.Get("id").(string)
-
-	if !ok {
-		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Session ID not found after authorization."), Messages: []string{"Unexpected error updating User logo!"}}
-	}
-
-	id, err := uuid.Parse(userId)
+	id, err := uuid.Parse(context.Get("id").(string))
 
 	if err != nil {
-		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error deleting User!"}}
+		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Session ID not found after authorization."), Messages: []string{"Unexpected error updating User logo!"}}
 	}
 
 	if err := api.db.DeleteUser(id); err != nil {
@@ -254,16 +224,10 @@ func (api *API) DeleteUserHandler(context echo.Context) error {
 }
 
 func (api *API) DeleteUserLogoHandler(context echo.Context) error {
-	userId, ok := context.Get("id").(string)
-
-	if !ok {
-		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Session ID not found after authorization."), Messages: []string{"Unexpected error deleting User logo!"}}
-	}
-
-	id, err := uuid.Parse(userId)
+	id, err := uuid.Parse(context.Get("id").(string))
 
 	if err != nil {
-		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error deleting User logo!"}}
+		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Session ID not found after authorization."), Messages: []string{"Unexpected error deleting User logo!"}}
 	}
 
 	var user types.User

@@ -13,6 +13,7 @@ func (db *DB) CreateUser(body types.CreateUserRequestBody) (types.User, error) {
 	user := types.User{
 		ID:         uuid.New().String(),
 		SessionID:  uuid.New().String(),
+		Username:   strings.ToLower(body.Username),
 		Name:       body.Name,
 		FiscalCode: body.FiscalCode,
 		Address:    body.Address,
@@ -81,6 +82,7 @@ func (db *DB) UpdateUser(id uuid.UUID, body types.UpdateUserRequestBody, user *t
 	}
 
 	result = db.instance.Model(user).Updates(types.User{
+		Username:   strings.ToLower(body.Username),
 		Name:       body.Name,
 		FiscalCode: body.FiscalCode,
 		Address:    body.Address,
@@ -88,7 +90,6 @@ func (db *DB) UpdateUser(id uuid.UUID, body types.UpdateUserRequestBody, user *t
 		Country:    body.Country,
 		Phone:      body.Phone,
 		Email:      body.Email,
-		Username:   strings.ToLower(body.Username),
 	})
 
 	if result.Error != nil {

@@ -78,16 +78,16 @@ type Invoice struct {
 type CreateItemRequestBody struct {
 	Name     string `json:"name" validate:"alpha,required"`
 	Type     string `json:"type" validate:"alpha,required"`
-	Price    uint32 `json:"price" validate:"number,required"`
 	Quantity uint32 `json:"quantity" validate:"number,required"`
+	Price    uint32 `json:"price" validate:"number,required"`
 	Tax      uint32 `json:"tax" validate:"number,omitempty"`
 }
 
 type UpdateItemRequestBody struct {
 	Name     string `json:"name" validate:"alpha,omitempty"`
 	Type     string `json:"type" validate:"alpha,omitempty"`
-	Price    uint32 `json:"price" validate:"number,omitempty"`
 	Quantity uint32 `json:"quantity" validate:"number,omitempty"`
+	Price    uint32 `json:"price" validate:"number,omitempty"`
 	Tax      uint32 `json:"tax" validate:"number,omitempty"`
 }
 

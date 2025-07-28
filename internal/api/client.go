@@ -11,16 +11,10 @@ import (
 )
 
 func (api *API) CreateClientHandler(context echo.Context) error {
-	userId, ok := context.Get("id").(string)
-
-	if !ok {
-		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Session ID not found after authorization."), Messages: []string{"Unexpected error getting User!"}}
-	}
-
-	id, err := uuid.Parse(userId)
+	userId, err := uuid.Parse(context.Get("id").(string))
 
 	if err != nil {
-		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error getting User!"}}
+		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Session ID not found after authorization."), Messages: []string{"Unexpected error getting User!"}}
 	}
 
 	var body types.CreateClientRequestBody
@@ -33,7 +27,7 @@ func (api *API) CreateClientHandler(context echo.Context) error {
 		return err
 	}
 
-	client, err := api.db.CreateClient(id, body)
+	client, err := api.db.CreateClient(userId, body)
 
 	if err != nil {
 		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error creating User!"}}
@@ -43,19 +37,13 @@ func (api *API) CreateClientHandler(context echo.Context) error {
 }
 
 func (api *API) GetAllClientsHandler(context echo.Context) error {
-	userId, ok := context.Get("id").(string)
+	userId, err := uuid.Parse(context.Get("id").(string))
 
-	if !ok {
+	if err != nil {
 		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Session ID not found after authorization."), Messages: []string{"Unexpected error getting User!"}}
 	}
 
-	id, err := uuid.Parse(userId)
-
-	if err != nil {
-		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error getting User!"}}
-	}
-
-	clients, err := api.db.GetClients(id)
+	clients, err := api.db.GetClients(userId)
 
 	if err != nil {
 		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error getting Clients!"}}
@@ -65,16 +53,10 @@ func (api *API) GetAllClientsHandler(context echo.Context) error {
 }
 
 func (api *API) GetClientHandler(context echo.Context) error {
-	userIdString, ok := context.Get("id").(string)
-
-	if !ok {
-		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Session ID not found after authorization."), Messages: []string{"Unexpected error getting User!"}}
-	}
-
-	userId, err := uuid.Parse(userIdString)
+	userId, err := uuid.Parse(context.Get("id").(string))
 
 	if err != nil {
-		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error getting User!"}}
+		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Session ID not found after authorization."), Messages: []string{"Unexpected error getting User!"}}
 	}
 
 	id, err := uuid.Parse(context.Param("id"))
@@ -93,16 +75,10 @@ func (api *API) GetClientHandler(context echo.Context) error {
 }
 
 func (api *API) UpdateClientHandler(context echo.Context) error {
-	userIdString, ok := context.Get("id").(string)
-
-	if !ok {
-		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Session ID not found after authorization."), Messages: []string{"Unexpected error getting User!"}}
-	}
-
-	userId, err := uuid.Parse(userIdString)
+	userId, err := uuid.Parse(context.Get("id").(string))
 
 	if err != nil {
-		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error getting User!"}}
+		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Session ID not found after authorization."), Messages: []string{"Unexpected error getting User!"}}
 	}
 
 	id, err := uuid.Parse(context.Param("id"))
@@ -137,16 +113,10 @@ func (api *API) UpdateClientHandler(context echo.Context) error {
 }
 
 func (api *API) DeleteClientHandler(context echo.Context) error {
-	userIdString, ok := context.Get("id").(string)
-
-	if !ok {
-		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Session ID not found after authorization."), Messages: []string{"Unexpected error getting User!"}}
-	}
-
-	userId, err := uuid.Parse(userIdString)
+	userId, err := uuid.Parse(context.Get("id").(string))
 
 	if err != nil {
-		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error getting User!"}}
+		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Session ID not found after authorization."), Messages: []string{"Unexpected error getting User!"}}
 	}
 
 	id, err := uuid.Parse(context.Param("id"))

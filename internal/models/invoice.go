@@ -16,6 +16,7 @@ func (db *DB) CreateItem(userId, invoiceId uuid.UUID, body types.CreateItemReque
 		Name:      body.Name,
 		Type:      body.Type,
 		Quantity:  body.Quantity,
+		Price:     body.Price,
 		Tax:       body.Tax,
 	}
 
@@ -135,6 +136,7 @@ func (db *DB) UpdateItem(userId, id uuid.UUID, body types.UpdateItemRequestBody,
 		Name:     body.Name,
 		Type:     body.Type,
 		Quantity: body.Quantity,
+		Price:    body.Price,
 		Tax:      body.Tax,
 	})
 
