@@ -2,11 +2,13 @@ package api
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 
+	"github.com/hazemKrimi/crimson-vault/internal/lib"
 	"github.com/hazemKrimi/crimson-vault/internal/types"
 )
 
@@ -55,13 +57,37 @@ func (api *API) CreateInvoiceHandler(context echo.Context) error {
 		return err
 	}
 
+	clientId, err := uuid.Parse(body.ClientID)
+
+	if err != nil {
+		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Invalid Client ID."), Messages: []string{"Unexpected error getting User!"}}
+	}
+
+	var client types.Client
+
+	if err := api.db.GetClientById(userId, clientId, &client); err != nil {
+		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Unexpected error getting Client."), Messages: []string{"Unexpected error getting User!"}}
+	}
+
+	if client.UserID != context.Get("id") {
+		return types.Error{Code: http.StatusBadRequest, Cause: err, Messages: []string{"Client does not belong to this User!"}}
+	}
+
 	invoice, err := api.db.CreateInvoice(userId, body)
 
 	if err != nil {
 		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error creating Invoice!"}}
 	}
 
-	return context.JSON(http.StatusOK, invoice)
+	var user types.User
+
+	if err := api.db.GetUserById(userId, &user); err != nil {
+		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Unexpected error getting User."), Messages: []string{"Unexpected error getting User!"}}
+	}
+
+	lib.GenerateInvoice(invoice, user, client)
+
+	return context.Attachment(fmt.Sprintf("invoices/%s.pdf", invoice.ID), fmt.Sprintf("invoices/%s.pdf", invoice.ID))
 }
 
 func (api *API) GetAllItemsHandler(context echo.Context) error {

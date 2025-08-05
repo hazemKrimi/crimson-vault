@@ -95,7 +95,7 @@ type CreateInvoiceRequestBody struct {
 	ClientID string                  `json:"clientId" validate:"uuid4,required"`
 	DueAt    string                  `json:"dueAt" validate:"datetime=2006-01-02T15:04:05Z,required"`
 	Currency string                  `json:"currency" validate:"iso4217,required"`
-	VAT      uint32                  `json:"vat" validate:"number,required"`
+	VAT      uint32                  `json:"vat" validate:"number,omitempty"`
 	Items    []CreateItemRequestBody `json:"items"`
 }
 
