@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"time"
 
 	"github.com/google/uuid"
@@ -165,6 +166,24 @@ func (db *DB) UpdateInvoice(userId, id uuid.UUID, body types.UpdateInvoiceReques
 		Currency: body.Currency,
 		VAT:      body.VAT,
 		Status:   body.Status,
+	})
+
+	return nil
+}
+
+func (db *DB) UpdateInvoicePDF(userId, id uuid.UUID, pdf string, invoice *types.Invoice) error {
+	if pdf == "" {
+		return errors.New("PDF path is empty!")
+	}
+
+	result := db.instance.Where("user_id = ?", userId).Where("id = ?", id).First(invoice)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	result = db.instance.Model(invoice).Updates(types.Invoice{
+		PDF:    pdf,
 	})
 
 	return nil

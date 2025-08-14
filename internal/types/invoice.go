@@ -30,7 +30,7 @@ type Item struct {
 	UserID    string `json:"userId" gorm:"type:varchar(255)"`
 	Name      string `json:"name"`
 	Type      string `json:"type"`
-	Price     uint32 `json:"price"`
+	Price     float32 `json:"price"`
 	Quantity  uint32 `json:"quantity"`
 	Tax       uint32 `json:"tax"`
 }
@@ -79,7 +79,7 @@ type CreateItemRequestBody struct {
 	Name     string `json:"name" validate:"alpha,required"`
 	Type     string `json:"type" validate:"alpha,required"`
 	Quantity uint32 `json:"quantity" validate:"number,required"`
-	Price    uint32 `json:"price" validate:"number,required"`
+	Price    float32 `json:"price" validate:"number,required"`
 	Tax      uint32 `json:"tax" validate:"number,omitempty"`
 }
 
@@ -87,7 +87,7 @@ type UpdateItemRequestBody struct {
 	Name     string `json:"name" validate:"alpha,omitempty"`
 	Type     string `json:"type" validate:"alpha,omitempty"`
 	Quantity uint32 `json:"quantity" validate:"number,omitempty"`
-	Price    uint32 `json:"price" validate:"number,omitempty"`
+	Price    float32 `json:"price" validate:"number,omitempty"`
 	Tax      uint32 `json:"tax" validate:"number,omitempty"`
 }
 

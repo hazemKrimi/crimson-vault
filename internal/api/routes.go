@@ -32,6 +32,7 @@ func (api *API) InvoiceRoutes() {
 	invoices.POST("/", api.CreateInvoiceHandler)
 	invoices.POST("/:id/items/", api.CreateItemHandler)
 	invoices.GET("/:id/", api.GetInvoiceHandler)
+	invoices.GET("/:id/download/", api.DownloadInvoiceHandler)
 	invoices.GET("/:id/items/", api.GetAllItemsHandler)
 	invoices.GET("/items/:id/", api.GetItemHandler)
 	invoices.PUT("/:id/", api.UpdateInvoiceHandler)

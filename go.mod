@@ -7,6 +7,7 @@ require (
 	github.com/go-playground/validator/v10 v10.26.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/sessions v1.4.0
+	github.com/johnfercher/maroto/v2 v2.3.1
 	github.com/labstack/echo-contrib v0.17.4
 	github.com/labstack/echo/v4 v4.13.4
 	github.com/spf13/cobra v1.9.1
@@ -38,7 +39,6 @@ require (
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/johnfercher/go-tree v1.0.5 // indirect
-	github.com/johnfercher/maroto/v2 v2.3.1 // indirect
 	github.com/jung-kurt/gofpdf v1.16.2 // indirect
 	github.com/labstack/gommon v0.4.2 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect

@@ -9,7 +9,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
 	"github.com/johnfercher/maroto/v2"
-	"github.com/johnfercher/maroto/v2/pkg/components/code"
 	"github.com/johnfercher/maroto/v2/pkg/components/col"
 	"github.com/johnfercher/maroto/v2/pkg/components/image"
 	"github.com/johnfercher/maroto/v2/pkg/components/row"
@@ -25,7 +24,7 @@ import (
 	"github.com/hazemKrimi/crimson-vault/internal/types"
 )
 
-func GetConfigDirectory() (string, error) {
+func GetConfigDirectoryPath() (string, error) {
 	home, err := os.UserHomeDir()
 
 	if err != nil {
@@ -172,7 +171,7 @@ func getTransactions(items []types.Item) []core.Row {
 			col.New(3),
 			text.NewCol(4, item.Name, props.Text{Size: 8, Align: align.Center}),
 			text.NewCol(2, fmt.Sprintf("%d", item.Quantity), props.Text{Size: 8, Align: align.Center}),
-			text.NewCol(3, fmt.Sprintf("%d", item.Price), props.Text{Size: 8, Align: align.Center}),
+			text.NewCol(3, fmt.Sprintf("%.2f", item.Price), props.Text{Size: 8, Align: align.Center}),
 		)
 		if i%2 == 0 {
 			gray := getGrayColor()
@@ -203,7 +202,7 @@ func getTransactions(items []types.Item) []core.Row {
 	return rows
 }
 
-func GenerateInvoice(invoice types.Invoice, user types.User, client types.Client) error {
+func GenerateInvoice(invoice types.Invoice, user types.User, client types.Client) (string, error) {
 	cfg := config.NewBuilder().WithPageNumber().WithLeftMargin(10).WithRightMargin(10).WithTopMargin(15).Build()
 	darkGray := getDarkGrayColor()
 	mrt := maroto.New(cfg)
@@ -212,23 +211,23 @@ func GenerateInvoice(invoice types.Invoice, user types.User, client types.Client
 	err := m.RegisterHeader(getPageHeader(client, user.Logo))
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	err = m.RegisterFooter(getPageFooter(user))
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	m.AddRows(text.NewRow(10, "Invoice ABC123456789", props.Text{
+	m.AddRows(text.NewRow(10, fmt.Sprintf("Invoice %s", invoice.ID), props.Text{
 		Top:   3,
 		Style: fontstyle.Bold,
 		Align: align.Center,
 	}))
 
 	m.AddRow(7,
-		text.NewCol(3, "Transactions", props.Text{
+		text.NewCol(3, "Items", props.Text{
 			Top:   1.5,
 			Size:  9,
 			Style: fontstyle.Bold,
@@ -239,43 +238,32 @@ func GenerateInvoice(invoice types.Invoice, user types.User, client types.Client
 
 	m.AddRows(getTransactions(invoice.Items)...)
 
-	m.AddRow(15,
-		col.New(6).Add(
-			code.NewBar("5123.151231.512314.1251251.123215", props.Barcode{
-				Percent: 0,
-				Proportion: props.Proportion{
-					Width:  20,
-					Height: 2,
-				},
-			}),
-			text.New("5123.151231.512314.1251251.123215", props.Text{
-				Top:    12,
-				Family: "",
-				Style:  fontstyle.Bold,
-				Size:   9,
-				Align:  align.Center,
-			}),
-		),
-		col.New(6),
-	)
-
 	document, err := m.Generate()
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	err = document.Save(fmt.Sprintf("invoices/%s.pdf", invoice.ID))
+	configDir, err := GetConfigDirectoryPath()
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	err = document.GetReport().Save(fmt.Sprintf("invoices/%s.txt", invoice.ID))
+	invoicesDir := filepath.Join(configDir, user.Username, client.ID)
+
+	if err := os.MkdirAll(invoicesDir, os.ModePerm); err != nil {
+		return "", err
+	}
+
+	invoiceFileName := fmt.Sprintf("%s.pdf", invoice.ID)
+	invoicePath := filepath.Join(invoicesDir, invoiceFileName)
+
+	err = document.Save(invoicePath)
 
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return invoicePath, nil
 }

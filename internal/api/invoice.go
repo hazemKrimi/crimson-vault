@@ -85,9 +85,26 @@ func (api *API) CreateInvoiceHandler(context echo.Context) error {
 		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Unexpected error getting User."), Messages: []string{"Unexpected error getting User!"}}
 	}
 
-	lib.GenerateInvoice(invoice, user, client)
+	path, err := lib.GenerateInvoice(invoice, user, client)
 
-	return context.Attachment(fmt.Sprintf("invoices/%s.pdf", invoice.ID), fmt.Sprintf("invoices/%s.pdf", invoice.ID))
+	if err != nil {
+		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error generating Invoice!"}}
+	}
+
+	invoiceFileName := fmt.Sprintf("%s.pdf", invoice.ID)
+	invoiceId, err := uuid.Parse(invoice.ID)
+
+	if err != nil {
+		return types.Error{Code: http.StatusBadRequest, Messages: []string{"Could not parse Invoice ID!"}}
+	}
+
+	err = api.db.UpdateInvoicePDF(userId, invoiceId, path, &invoice)
+
+	if err != nil {
+		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error generating Invoice!"}}
+	}
+
+	return context.Attachment(path, invoiceFileName)
 }
 
 func (api *API) GetAllItemsHandler(context echo.Context) error {
@@ -170,6 +187,70 @@ func (api *API) GetInvoiceHandler(context echo.Context) error {
 	}
 
 	return context.JSON(http.StatusOK, invoice)
+}
+
+func (api *API) DownloadInvoiceHandler(context echo.Context) error {
+	userId, err := uuid.Parse(context.Get("id").(string))
+
+	if err != nil {
+		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Session ID not found after authorization."), Messages: []string{"Unexpected error getting User!"}}
+	}
+
+	id, err := uuid.Parse(context.Param("id"))
+
+	if err != nil {
+		return types.Error{Code: http.StatusBadRequest, Messages: []string{"ID is required to download an Invoice!"}}
+	}
+
+	var invoice types.Invoice
+
+	if err := api.db.GetInvoiceById(userId, id, &invoice); err != nil {
+		return types.Error{Code: http.StatusNotFound, Messages: []string{"Invoice not found!"}}
+	}
+
+	if invoice.PDF != "" {
+		invoiceFileName := fmt.Sprintf("%s.pdf", invoice.ID)
+		return context.Attachment(invoice.PDF, invoiceFileName)
+	}
+
+	var user types.User
+
+	if err := api.db.GetUserById(userId, &user); err != nil {
+		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Unexpected error getting User."), Messages: []string{"Unexpected error getting User!"}}
+	}
+
+	clientId, err := uuid.Parse(invoice.ClientID)
+
+	if err != nil {
+		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Invalid Client ID."), Messages: []string{"Unexpected error getting User!"}}
+	}
+
+	var client types.Client
+
+	if err := api.db.GetClientById(userId, clientId, &client); err != nil {
+		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Unexpected error getting Client."), Messages: []string{"Unexpected error getting User!"}}
+	}
+
+	path, err := lib.GenerateInvoice(invoice, user, client)
+
+	if err != nil {
+		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error generating Invoice!"}}
+	}
+
+	invoiceFileName := fmt.Sprintf("%s.pdf", invoice.ID)
+	invoiceId, err := uuid.Parse(invoice.ID)
+
+	if err != nil {
+		return types.Error{Code: http.StatusBadRequest, Messages: []string{"Could not parse Invoice ID!"}}
+	}
+
+	err = api.db.UpdateInvoicePDF(userId, invoiceId, path, &invoice)
+
+	if err != nil {
+		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error generating Invoice!"}}
+	}
+
+	return context.Attachment(path, invoiceFileName)
 }
 
 func (api *API) UpdateItemHandler(context echo.Context) error {
