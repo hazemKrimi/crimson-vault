@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"github.com/hazemKrimi/crimson-vault/internal/lib"
 	"github.com/hazemKrimi/crimson-vault/internal/types"
 )
 
@@ -30,7 +31,7 @@ func (db *DB) CreateItem(userId, invoiceId uuid.UUID, body types.CreateItemReque
 	return item, nil
 }
 
-func (db *DB) CreateInvoice(userId uuid.UUID, body types.CreateInvoiceRequestBody) (types.Invoice, error) {
+func (db *DB) CreateInvoice(userId uuid.UUID, body types.CreateInvoiceRequestBody, issuedInvoicesThisYear uint32) (types.Invoice, error) {
 	dueAt, err := time.Parse("2006-01-02T15:04:05Z", body.DueAt)
 
 	if err != nil {
@@ -45,6 +46,7 @@ func (db *DB) CreateInvoice(userId uuid.UUID, body types.CreateInvoiceRequestBod
 		Currency: body.Currency,
 		VAT:      body.VAT,
 		Status:   types.Draft.String(),
+		Reference: lib.GenerateInvoiceReference(issuedInvoicesThisYear + 1),
 	}
 
 	result := db.instance.Create(&invoice)

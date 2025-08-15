@@ -21,6 +21,7 @@ func (db *DB) CreateUser(body types.CreateUserRequestBody) (types.User, error) {
 		Country:    body.Country,
 		Phone:      body.Phone,
 		Email:      body.Email,
+		IssuedInvoicesThisYear: 0,
 	}
 
 	result := db.instance.Create(&user)
@@ -90,6 +91,24 @@ func (db *DB) UpdateUser(id uuid.UUID, body types.UpdateUserRequestBody, user *t
 		Country:    body.Country,
 		Phone:      body.Phone,
 		Email:      body.Email,
+	})
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
+func (db *DB) UpdateUserIssuesInvoicesThisYear(id uuid.UUID, issuedInvoicesThisYear uint32, user *types.User) error {
+	result := db.instance.Where("id = ?", id).First(user, id)
+
+	if result.Error != nil {
+		return result.Error
+	}
+
+	result = db.instance.Model(user).Updates(types.User{
+		IssuedInvoicesThisYear: issuedInvoicesThisYear,
 	})
 
 	if result.Error != nil {

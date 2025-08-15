@@ -7,22 +7,23 @@ import (
 )
 
 type User struct {
-	ID         string         `json:"id" gorm:"type:varchar(255);primaryKey"`
-	SessionID  string         `json:"-"`
-	CreatedAt  time.Time      `json:"createAt"`
-	UpdatedAt  time.Time      `json:"updatedAt"`
-	DeletedAt  gorm.DeletedAt `json:"deletedAt" gorm:"index"`
-	Logo       string         `json:"logo"`
-	Name       string         `json:"name"`
-	FiscalCode string         `json:"fiscalCode"`
-	Address    string         `json:"address"`
-	Zip        string         `json:"zip"`
-	Country    string         `json:"country"`
-	Phone      string         `json:"phone"`
-	Email      string         `json:"email"`
-	Username   string         `json:"username" gorm:"unique"`
-	Password   string         `json:"-"`
-	Clients    []Client       `json:"clients" gorm:"constraint:onDelete:CASCADE"`
+	ID                     string         `json:"id" gorm:"type:varchar(255);primaryKey"`
+	SessionID              string         `json:"-"`
+	CreatedAt              time.Time      `json:"createAt"`
+	UpdatedAt              time.Time      `json:"updatedAt"`
+	DeletedAt              gorm.DeletedAt `json:"deletedAt" gorm:"index"`
+	Logo                   string         `json:"logo"`
+	Name                   string         `json:"name"`
+	FiscalCode             string         `json:"fiscalCode"`
+	Address                string         `json:"address"`
+	Zip                    string         `json:"zip"`
+	Country                string         `json:"country"`
+	Phone                  string         `json:"phone"`
+	Email                  string         `json:"email"`
+	Username               string         `json:"username" gorm:"unique"`
+	Password               string         `json:"-"`
+	Clients                []Client       `json:"clients" gorm:"constraint:onDelete:CASCADE"`
+	IssuedInvoicesThisYear uint32         `json:"-"`
 }
 
 type CreateUserRequestBody struct {

@@ -73,15 +73,19 @@ func (api *API) CreateInvoiceHandler(context echo.Context) error {
 		return types.Error{Code: http.StatusBadRequest, Cause: err, Messages: []string{"Client does not belong to this User!"}}
 	}
 
-	invoice, err := api.db.CreateInvoice(userId, body)
+	var user types.User
+
+	if err := api.db.GetUserById(userId, &user); err != nil {
+		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Unexpected error getting User."), Messages: []string{"Unexpected error getting User!"}}
+	}
+
+	invoice, err := api.db.CreateInvoice(userId, body, user.IssuedInvoicesThisYear)
 
 	if err != nil {
 		return types.Error{Code: http.StatusInternalServerError, Cause: err, Messages: []string{"Unexpected error creating Invoice!"}}
 	}
 
-	var user types.User
-
-	if err := api.db.GetUserById(userId, &user); err != nil {
+	if err := api.db.UpdateUserIssuesInvoicesThisYear(userId, user.IssuedInvoicesThisYear + 1, &user); err != nil {
 		return types.Error{Code: http.StatusInternalServerError, Cause: errors.New("Unexpected error getting User."), Messages: []string{"Unexpected error getting User!"}}
 	}
 

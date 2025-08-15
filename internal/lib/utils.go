@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
@@ -266,4 +267,10 @@ func GenerateInvoice(invoice types.Invoice, user types.User, client types.Client
 	}
 
 	return invoicePath, nil
+}
+
+func GenerateInvoiceReference(invoiceNumber uint32) string {
+	year, _, _ := time.Now().Date()
+
+	return fmt.Sprintf("INV/%d/%05d", year, invoiceNumber)
 }
